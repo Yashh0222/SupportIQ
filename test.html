@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SupportIQ Embed Test</title>
+  </head>
+  <body>
+    <main style="font-family: system-ui, sans-serif; padding: 2rem; max-width: 640px; margin: 0 auto;">
+      <h1>SupportIQ Embed Test</h1>
+      <p>
+        This page has no React build — it loads the single <code>widget.js</code> bundle via a
+        script tag. A chat bubble should appear in the bottom-right corner.
+      </p>
+    </main>
+    <script src="frontend/dist-widget/widget.js" data-api-url="http://localhost:8000" data-org="Globex" data-company="globex"></script>
+  </body>
+</html>

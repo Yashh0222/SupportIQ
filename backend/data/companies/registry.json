@@ -1,0 +1,12 @@
+{
+  "acmeai": {
+    "id": "acmeai",
+    "display_name": "Acme AI",
+    "description": "an AI tools suite"
+  },
+  "c1": {
+    "id": "c1",
+    "display_name": "Wanderlust - List your place",
+    "description": "Ai Assisted Listing booking and Listing company "
+  }
+}
