@@ -13,7 +13,7 @@ export default function ChatWidget({ apiUrl, org, company }: ChatWidgetProps = {
   const conversationId = useRef(uid()).current
 
   return (
-    <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 2147483647, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
+    <div style={{ position: 'fixed', bottom: '20px', right: '88px', zIndex: 2147483647, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
       {open && (
         <ChatWindow conversationId={conversationId} apiUrl={apiUrl} org={org} company={company} />
       )}
