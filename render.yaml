@@ -16,5 +16,3 @@ services:
         value: "https://api.smith.langchain.com"
       - key: LANGCHAIN_PROJECT
         value: "supportiq"
-      - key: PYTHON_VERSION
-        value: "3.11.0"
