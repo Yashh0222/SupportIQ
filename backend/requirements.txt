@@ -4,6 +4,8 @@ uvicorn[standard]
 langchain
 langchain-community
 langchain-huggingface
+langchain-chroma
+langchain-text-splitters
 langgraph
 langchain-groq
 sentence-transformers
