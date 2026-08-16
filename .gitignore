@@ -9,7 +9,6 @@ venv/
 .env
 
 # Data
-backend/data/chroma_db/
 
 # Frontend
 frontend/node_modules/
