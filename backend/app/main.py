@@ -13,7 +13,7 @@ app = FastAPI(title="SupportIQ", version="0.3.0")
 
 _allowed_origins = os.getenv(
     "ALLOWED_ORIGINS",
-    "https://support-iq-yk.vercel.app,http://localhost:5173,http://localhost:3000",
+    "https://support-iq-yk.vercel.app,https://wanderlust-project-18.onrender.com,http://localhost:5173,http://localhost:3000",
 ).split(",")
 
 app.add_middleware(

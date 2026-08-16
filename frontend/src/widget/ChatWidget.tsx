@@ -13,14 +13,14 @@ export default function ChatWidget({ apiUrl, org, company }: ChatWidgetProps = {
   const conversationId = useRef(uid()).current
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+    <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 2147483647, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
       {open && (
         <ChatWindow conversationId={conversationId} apiUrl={apiUrl} org={org} company={company} />
       )}
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Toggle chat"
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg transition hover:bg-indigo-700"
+        style={{ display: 'flex', height: '56px', width: '56px', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', backgroundColor: '#4f46e5', color: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.25)', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
       >
         <svg
           width="24"

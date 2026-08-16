@@ -79,17 +79,17 @@ export default function ChatWindow({
   const escalated = lastBot?.trace?.escalated === true
 
   return (
-    <div className="flex h-[min(560px,calc(100dvh-100px))] w-[min(380px,calc(100vw-24px))] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 shadow-xl">
-      <div className="flex items-center justify-between bg-indigo-600 px-4 py-3 text-white">
+    <div style={{ display: 'flex', height: 'min(560px, calc(100dvh - 100px))', width: 'min(380px, calc(100vw - 24px))', flexDirection: 'column', overflow: 'hidden', borderRadius: '16px', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb', boxShadow: '0 8px 30px rgba(0,0,0,0.15)', fontFamily: 'system-ui, -apple-system, sans-serif', fontSize: '14px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#4f46e5', padding: '12px 16px', color: '#fff' }}>
         <div>
-          <div className="text-sm font-semibold">SupportIQ</div>
-          <div className="text-[11px] text-indigo-200">
+          <div style={{ fontSize: '14px', fontWeight: 600 }}>SupportIQ</div>
+          <div style={{ fontSize: '11px', color: '#c7d2fe' }}>
             {org ? `AI support for ${org}` : 'AI support assistant'}
           </div>
         </div>
       </div>
 
-      <div ref={listRef} className="flex-1 space-y-2.5 overflow-y-auto p-3">
+      <div ref={listRef} style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {state.messages.map((message) => (
           <div key={message.id}>
             <MessageBubble message={message} />
@@ -99,19 +99,19 @@ export default function ChatWindow({
         {state.loading && <TypingIndicator />}
       </div>
 
-      <div className="border-t border-gray-200 bg-white p-3">
+      <div style={{ borderTop: '1px solid #e5e7eb', backgroundColor: '#fff', padding: '12px' }}>
         {escalated && <EscalationBanner />}
-        <form onSubmit={onSubmit} className="flex items-center gap-2">
+        <form onSubmit={onSubmit} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={org ? `Ask about ${org}...` : 'Ask about AcmeCRM...'}
-            className="flex-1 rounded-full border border-gray-300 px-3.5 py-2 text-sm outline-none focus:border-indigo-500"
+            style={{ flex: 1, borderRadius: '9999px', border: '1px solid #d1d5db', padding: '8px 14px', fontSize: '14px', outline: 'none', fontFamily: 'inherit' }}
           />
           <button
             type="submit"
             disabled={state.loading || !input.trim()}
-            className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+            style={{ borderRadius: '9999px', backgroundColor: '#4f46e5', padding: '8px 16px', fontSize: '14px', fontWeight: 600, color: '#fff', border: 'none', cursor: 'pointer', opacity: state.loading || !input.trim() ? 0.5 : 1, fontFamily: 'inherit' }}
           >
             Send
           </button>
