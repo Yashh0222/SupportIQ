@@ -11,7 +11,10 @@ from app.routes.upload import router as upload_router
 
 app = FastAPI(title="SupportIQ", version="0.3.0")
 
-_allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+_allowed_origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    "https://support-iq-yk.vercel.app,http://localhost:5173,http://localhost:3000",
+).split(",")
 
 app.add_middleware(
     CORSMiddleware,
