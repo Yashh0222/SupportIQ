@@ -15,6 +15,8 @@ export interface EmbedOptions {
 const STYLE_ID = 'supportiq-widget-styles'
 const CONTAINER_ID = 'supportiq-widget-root'
 
+const _scriptEl = document.currentScript as HTMLScriptElement | null
+
 let root: Root | null = null
 let currentOptions: EmbedOptions = {}
 
@@ -27,7 +29,7 @@ function injectStyles(): void {
 }
 
 function readScriptOptions(): EmbedOptions {
-  const script = document.currentScript as HTMLScriptElement | null
+  const script = _scriptEl
   if (!script?.dataset) return {}
   const options: EmbedOptions = {}
   if (script.dataset.apiUrl) options.apiUrl = script.dataset.apiUrl

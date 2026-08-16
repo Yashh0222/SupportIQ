@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acme Corp - Support</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    p { color: #64748b; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to Acme Corp</h1>
+    <p>This is a demo company website. The SupportIQ chat widget is in the bottom-right corner. Click it to ask questions about Acme products, billing, API docs, etc.</p>
+  </div>
+
+  <!-- ========== SUPPORTIQ WIDGET - Add this script tag to any website ========== -->
+  <script 
+    src="https://support-iq-yk.vercel.app/widget.js" 
+    data-api-url="https://supportiq-backend-b9o5.onrender.com"
+    data-company="acmecrm"
+    data-org="Acme Corp">
+  </script>
+  <!-- ======================================================================== -->
+</body>
+</html>
