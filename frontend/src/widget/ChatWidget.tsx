@@ -1,3 +1,4 @@
+// updated chat widget 
 import { useRef, useState } from 'react'
 import ChatWindow from './ChatWindow'
 import { uid } from './id'
