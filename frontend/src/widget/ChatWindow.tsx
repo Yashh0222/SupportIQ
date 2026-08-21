@@ -8,7 +8,7 @@ import MessageBubble from './MessageBubble'
 import TracePanel from './TracePanel'
 import TypingIndicator from './TypingIndicator'
 
-// updated chat window 
+// updated chat window size
 interface ChatState {
   messages: ChatMessage[]
   loading: boolean
