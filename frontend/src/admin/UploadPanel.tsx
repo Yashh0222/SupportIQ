@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
+  addAllowedOrigin,
   createCompany,
+  fetchAllowedOrigins,
   fetchCompanies,
+  removeAllowedOrigin,
   uploadDocuments,
 } from '../api/client'
 import type { CompanyInfo, UploadResult } from '../api/client'
@@ -27,6 +30,11 @@ export default function UploadPanel() {
   const [creating, setCreating] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
 
+  const [origins, setOrigins] = useState<string[]>([])
+  const [newOrigin, setNewOrigin] = useState('')
+  const [originError, setOriginError] = useState<string | null>(null)
+  const [originBusy, setOriginBusy] = useState(false)
+
   const formRef = useRef<HTMLFormElement>(null)
 
   const loadCompanies = useCallback(async () => {
@@ -42,6 +50,48 @@ export default function UploadPanel() {
   useEffect(() => {
     void loadCompanies()
   }, [loadCompanies])
+
+  const loadOrigins = useCallback(async () => {
+    try {
+      setOrigins(await fetchAllowedOrigins())
+    } catch {
+      setOrigins([])
+    }
+  }, [])
+
+  useEffect(() => {
+    void loadOrigins()
+  }, [loadOrigins])
+
+  const onAddOrigin = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!newOrigin || originBusy) return
+    setOriginBusy(true)
+    setOriginError(null)
+    try {
+      setOrigins(await addAllowedOrigin(newOrigin))
+      setNewOrigin('')
+    } catch (err) {
+      const detail =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      setOriginError(detail ?? 'Could not add the origin.')
+    } finally {
+      setOriginBusy(false)
+    }
+  }
+
+  const onRemoveOrigin = async (origin: string) => {
+    if (originBusy) return
+    setOriginBusy(true)
+    setOriginError(null)
+    try {
+      setOrigins(await removeAllowedOrigin(origin))
+    } catch {
+      setOriginError('Could not remove the origin.')
+    } finally {
+      setOriginBusy(false)
+    }
+  }
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -182,6 +232,53 @@ export default function UploadPanel() {
           {state.message}
         </div>
       )}
+
+      <div className="mt-6 border-t border-gray-100 pt-4">
+        <h3 className="text-sm font-semibold text-gray-900">Site access</h3>
+        <p className="mt-1 text-xs text-gray-500">
+          Only these origins may load the chat widget and call the API. Add
+          your site&apos;s origin (e.g. https://mysite.com) to give it access.
+        </p>
+        <ul className="mt-2 space-y-1">
+          {origins.map((o) => (
+            <li
+              key={o}
+              className="flex items-center justify-between rounded-lg bg-indigo-50/60 px-3 py-1.5 text-xs text-gray-700"
+            >
+              <span className="truncate font-mono">{o}</span>
+              <button
+                type="button"
+                onClick={() => void onRemoveOrigin(o)}
+                disabled={originBusy}
+                className="ml-2 shrink-0 font-semibold text-red-500 hover:text-red-700 disabled:opacity-50"
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+          {origins.length === 0 && (
+            <li className="text-xs text-gray-400">
+              No origins yet — the widget will be blocked everywhere.
+            </li>
+          )}
+        </ul>
+        <form onSubmit={onAddOrigin} className="mt-2 flex gap-2">
+          <input
+            value={newOrigin}
+            onChange={(e) => setNewOrigin(e.target.value)}
+            placeholder="https://your-site.com"
+            className="flex-1 rounded-full border border-gray-300 px-3 py-1.5 text-xs outline-none focus:border-indigo-500"
+          />
+          <button
+            type="submit"
+            disabled={!newOrigin || originBusy}
+            className="rounded-full bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+          >
+            Add origin
+          </button>
+        </form>
+        {originError && <p className="mt-1 text-xs text-red-600">{originError}</p>}
+      </div>
 
       <p className="mt-4 text-xs text-gray-400">
         Supported formats: markdown, plain text, HTML, PDF.

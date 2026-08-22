@@ -96,3 +96,31 @@ export async function createCompany(
   )
   return data
 }
+
+export async function fetchAllowedOrigins(apiUrl?: string): Promise<string[]> {
+  const { data } = await axios.get<{ origins: string[] }>(
+    `${apiUrl ?? API_URL}/origins`,
+  )
+  return data.origins
+}
+
+export async function addAllowedOrigin(
+  origin: string,
+  apiUrl?: string,
+): Promise<string[]> {
+  const { data } = await axios.post<{ origins: string[] }>(
+    `${apiUrl ?? API_URL}/origins`,
+    { origin },
+  )
+  return data.origins
+}
+
+export async function removeAllowedOrigin(
+  origin: string,
+  apiUrl?: string,
+): Promise<string[]> {
+  const { data } = await axios.delete<{ origins: string[] }>(
+    `${apiUrl ?? API_URL}/origins/${encodeURIComponent(origin)}`,
+  )
+  return data.origins
+}

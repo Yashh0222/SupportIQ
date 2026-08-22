@@ -13,7 +13,7 @@ from app.ingestion.embedder import get_embedding_model
 from app.mcp_tools.client import call_tool
 from app.rag.vectorstore import load_vectorstore
 
-MODEL_NAME = "llama-3.1-8b-instant"
+MODEL_NAME = "openai/gpt-oss-20b"
 TOP_K = 3
 
 GENERATION_PROMPT = (
