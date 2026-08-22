@@ -1,7 +1,14 @@
-INFO:     Started server process [19428]
+INFO:     Started server process [9036]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|##########| 103/103 [00:00<00:00, 6227.94it/s]
-INFO:     127.0.0.1:1634 - "POST /chat HTTP/1.1" 200 OK
+[08/22/26 23:25:27] INFO     Processing request of type           server.py:733
+                             CallToolRequest                                   
+                    INFO     Processing request of type           server.py:733
+                             ListToolsRequest                                  
+INFO:     127.0.0.1:2596 - "POST /chat HTTP/1.1" 200 OK
+[08/22/26 23:25:32] INFO     Processing request of type           server.py:733
+                             CallToolRequest                                   
+                    INFO     Processing request of type           server.py:733
+                             ListToolsRequest                                  
+INFO:     127.0.0.1:2602 - "POST /chat HTTP/1.1" 200 OK

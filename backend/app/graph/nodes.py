@@ -38,46 +38,83 @@ REFORMULATE_PROMPT = (
 )
 
 ROUTE_PROMPT = (
-    "Classify the user's intent into exactly one of:\n"
-    "- 'wants_human': asking to speak with a human, representative, or agent, "
+    "Classify the user's message into exactly one label:\n"
+    "- 'wants_human': the user is requesting to talk with a human person now, "
     "or filing a complaint that clearly requires a person.\n"
-    "- 'tool_use': asking about a specific order's status, tracking, shipment, "
-    "or wanting to file a support ticket.\n"
-    "- 'faq': a general question that documentation should answer.\n"
+    "- 'tool_use': the user wants an action on a specific order or ticket "
+    "(check its status, track a specific order or shipment, open a ticket).\n"
+    "- 'faq': anything else, including questions ABOUT policies or processes, "
+    "such as when escalation to humans happens, how tracking works, or how "
+    "tickets are handled.\n"
+    "\n"
+    "Examples:\n"
+    "Message: I want to speak to a human -> wants_human\n"
+    "Message: connect me with your support agent -> wants_human\n"
+    "Message: this is unacceptable, I demand a refund from a person -> wants_human\n"
+    "Message: where is my order 12345 -> tool_use\n"
+    "Message: check the status of order 9876 -> tool_use\n"
+    "Message: I want to file a support ticket -> tool_use\n"
+    "Message: what are all the reasons you hand off to a human -> faq\n"
+    "Message: when do you escalate to a human -> faq\n"
+    "Message: how does order tracking work -> faq\n"
+    "Message: how do we book listing -> faq\n"
+    "\n"
     "Return only the label, nothing else."
 )
 
 EXTRACT_TOOL_PROMPT = (
-    "You are a function-calling assistant. Given the user's request, pick exactly "
-    "one tool and return a JSON object with the keys 'tool' and 'arguments' "
-    "where 'arguments' is a JSON object with the exact keys below:\n"
-    "- check_order_status: 'arguments' has the key 'order_id' (digits only). Use "
-    "it when the user asks about a specific order's status or tracking.\n"
-    "- create_ticket: 'arguments' has the key 'issue' (a short text). Use it when "
-    "the user wants to file an issue or complaint.\n"
-    "Return ONLY the JSON object, no markdown, no extra text."
+    "You read a customer support message and decide what should happen next. "
+    "Reply with ONLY a JSON object, nothing else: "
+    "{{\"action\": \"order_lookup\", \"order_id\": \"<digits>\"}} when the customer "
+    "refers to a specific order or shipment; "
+    "{{\"action\": \"new_ticket\", \"issue\": \"<short text>\"}} when they want to "
+    "report an issue or complaint."
 )
 
-HUMAN_INTENT_KEYWORDS = (
-    "human",
-    "agent",
-    "representative",
+_HUMAN_REQUEST_PHRASES = (
+    "speak to a human",
+    "talk to a human",
+    "speak with a human",
+    "talk with a human",
     "real person",
+    "human agent",
+    "human representative",
     "talk to someone",
     "speak to someone",
-    "escalate",
-    "complaint",
+    "connect me",
+    "transfer me",
+    "file a complaint",
 )
 
-TOOL_USE_KEYWORDS = (
-    "track",
-    "tracking",
-    "order status",
+_TOOL_REQUEST_PHRASES = (
     "where is my order",
-    "status of order",
-    "ticket",
-    "shipment",
+    "track my order",
+    "track order",
+    "track shipment",
+    "track my shipment",
+    "status of my order",
+    "order status for order",
+    "open a ticket",
+    "create a ticket",
+    "file a ticket",
 )
+
+
+async def route_node(state: GraphState) -> dict:
+    question = state["question"].lower()
+    if any(p in question for p in _HUMAN_REQUEST_PHRASES):
+        return {"intent": "wants_human"}
+    if any(p in question for p in _TOOL_REQUEST_PHRASES):
+        return {"intent": "tool_use"}
+    label = (
+        await (_route_prompt | _llm).ainvoke({"question": state["question"]})
+    ).content.strip().lower()
+    if "human" in label:
+        return {"intent": "wants_human"}
+    if "tool" in label:
+        return {"intent": "tool_use"}
+    return {"intent": "faq"}
+
 
 _generation_prompt = ChatPromptTemplate.from_messages(
     [
@@ -108,22 +145,6 @@ _llm = ChatGroq(model=MODEL_NAME)
 
 def _filename(source: str) -> str:
     return Path(source).name
-
-
-async def route_node(state: GraphState) -> dict:
-    question = state["question"].lower()
-    if any(k in question for k in TOOL_USE_KEYWORDS):
-        return {"intent": "tool_use"}
-    if any(k in question for k in HUMAN_INTENT_KEYWORDS):
-        return {"intent": "wants_human"}
-    label = (
-        await (_route_prompt | _llm).ainvoke({"question": state["question"]})
-    ).content.strip().lower()
-    if "human" in label:
-        return {"intent": "wants_human"}
-    if "tool" in label:
-        return {"intent": "tool_use"}
-    return {"intent": "faq"}
 
 
 async def retrieve_node(state: GraphState) -> dict:
@@ -188,9 +209,9 @@ def _resolve_tool(name: str, arguments: dict, question: str) -> tuple[str, dict]
     if "issue" in arguments:
         return "create_ticket", arguments
 
-    if "check_order" in name or "order_status" in name or name == "status":
+    if "order_lookup" in name or "check_order" in name or "order_status" in name or name == "status":
         return "check_order_status", arguments
-    if "ticket" in name or name == "create_ticket":
+    if "new_ticket" in name or "ticket" in name or name == "create_ticket":
         return "create_ticket", arguments
 
     if any(k in question.lower() for k in ("order", "track", "shipment")):
@@ -203,8 +224,11 @@ async def tool_node(state: GraphState) -> dict:
         {"question": state["question"]}
     )
     parsed = _parse_tool_json(response.content)
+    raw_args = parsed.get("arguments") or {k: v for k, v in parsed.items() if k != "action"}
     name, arguments = _resolve_tool(
-        parsed.get("tool"), parsed.get("arguments") or {}, state["question"]
+        parsed.get("tool") or parsed.get("action"),
+        raw_args,
+        state["question"],
     )
     arguments = _normalize_arguments(name, arguments)
 
