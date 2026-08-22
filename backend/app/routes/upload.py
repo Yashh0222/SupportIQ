@@ -7,6 +7,7 @@ from app.ingestion.chunker import chunk_documents
 from app.ingestion.embedder import get_embedding_model
 from app.ingestion.loader import load_documents
 from app.rag.vectorstore import load_vectorstore
+from app.routes.companies import invalidate_doc_count
 
 router = APIRouter(tags=["upload"])
 
@@ -38,6 +39,8 @@ async def upload(
                 "chunks_added": len(chunks),
             }
         )
+
+    invalidate_doc_count(company_id)
 
     return {
         "company": company_id,

@@ -18,9 +18,31 @@ type UploadState =
 
 const ACCEPTED = '.md,.txt,.rst,.html,.pdf'
 const DEFAULT_COMPANY = 'acmecrm'
+const COMPANIES_CACHE_KEY = 'supportiq:companies'
+
+function readCachedCompanies(): CompanyInfo[] {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(COMPANIES_CACHE_KEY) ?? '[]')
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(
+      (c): c is CompanyInfo =>
+        typeof c === 'object' && c !== null && typeof (c as CompanyInfo).id === 'string',
+    )
+  } catch {
+    return []
+  }
+}
+
+function cacheCompanies(list: CompanyInfo[]) {
+  try {
+    localStorage.setItem(COMPANIES_CACHE_KEY, JSON.stringify(list))
+  } catch {
+    return
+  }
+}
 
 export default function UploadPanel() {
-  const [companies, setCompanies] = useState<CompanyInfo[]>([])
+  const [companies, setCompanies] = useState<CompanyInfo[]>(readCachedCompanies)
   const [selected, setSelected] = useState(DEFAULT_COMPANY)
   const [files, setFiles] = useState<File[]>([])
   const [state, setState] = useState<UploadState>({ status: 'idle' })
@@ -42,8 +64,13 @@ export default function UploadPanel() {
       const list = await fetchCompanies()
       setCompanies(list)
       setSelected((prev) => (list.some((c) => c.id === prev) ? prev : list[0]?.id ?? DEFAULT_COMPANY))
+      cacheCompanies(list)
     } catch {
-      setCompanies([])
+      const cached = readCachedCompanies()
+      setCompanies(cached)
+      setSelected((prev) =>
+        cached.some((c) => c.id === prev) ? prev : (cached[0]?.id ?? DEFAULT_COMPANY),
+      )
     }
   }, [])
 
