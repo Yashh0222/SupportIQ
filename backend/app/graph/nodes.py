@@ -14,7 +14,7 @@ from app.mcp_tools.client import call_tool
 from app.rag.vectorstore import load_vectorstore
 
 MODEL_NAME = "openai/gpt-oss-20b"
-TOP_K = 3
+TOP_K = 5
 
 GENERATION_PROMPT = (
     "You are the customer support assistant for {company}, {company_description}. "

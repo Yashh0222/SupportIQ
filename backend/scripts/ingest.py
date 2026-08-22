@@ -14,7 +14,7 @@ from app.companies import DEFAULT_COMPANY_ID, company_raw_docs_dir
 from app.ingestion.chunker import chunk_documents
 from app.ingestion.embedder import get_embedding_model
 from app.ingestion.loader import load_documents
-from app.rag.vectorstore import build_vectorstore
+from app.rag.vectorstore import build_vectorstore, delete_company_collection
 
 
 def main() -> None:
@@ -30,6 +30,7 @@ def main() -> None:
 
     chunks = chunk_documents(docs)
     embedding_model = get_embedding_model()
+    delete_company_collection(args.company)
     build_vectorstore(chunks, embedding_model, args.company)
 
     sources = sorted({doc.metadata.get("source", "unknown") for doc in docs})

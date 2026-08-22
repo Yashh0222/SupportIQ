@@ -41,6 +41,11 @@ def load_vectorstore(
     )
 
 
+def delete_company_collection(company_id: str = DEFAULT_COMPANY_ID) -> None:
+    """Drop a company's collection entirely (used before full re-ingestion)."""
+    load_vectorstore(get_embedding_model(), company_id).delete_collection()
+
+
 def get_vectorstore(company_id: str = DEFAULT_COMPANY_ID) -> Chroma:
     """Load a company's vector store with the default embedding model."""
     return load_vectorstore(get_embedding_model(), company_id)
