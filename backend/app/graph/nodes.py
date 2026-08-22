@@ -20,7 +20,9 @@ GENERATION_PROMPT = (
     "You are the customer support assistant for {company}, {company_description}. "
     "Answer only using the provided context, which is the documentation for {company}. "
     "Never use knowledge about other companies. "
-    "If the context doesn't contain the answer, say you don't know."
+    "If the context doesn't contain the answer, say you don't know. "
+    "Answer in short, plain conversational text: no markdown, no asterisks, "
+    "no bold, no headers. Use simple dashes or numbered lines when listing steps."
 )
 
 GRADER_PROMPT = (

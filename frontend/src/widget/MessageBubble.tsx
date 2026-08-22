@@ -1,6 +1,14 @@
 import { useState } from 'react'
 import type { ChatMessage } from './types'
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*([^*\n]+)\*/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+}
+
 export default function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === 'user'
   const [showSources, setShowSources] = useState(false)
@@ -14,7 +22,9 @@ export default function MessageBubble({ message }: { message: ChatMessage }) {
             : 'rounded-bl-sm border border-gray-200 bg-white text-gray-800'
         }`}
       >
-        <div className="whitespace-pre-wrap break-words">{message.content}</div>
+        <div className="whitespace-pre-wrap break-words">
+          {isUser ? message.content : stripMarkdown(message.content)}
+        </div>
 
         {!isUser && message.sources && message.sources.length > 0 && (
           <button
