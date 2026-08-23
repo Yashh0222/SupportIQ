@@ -4,6 +4,7 @@ Run from the backend/ directory:
     python scripts/ingest.py --company acmecrm
 """
 
+
 import argparse
 import sys
 from pathlib import Path

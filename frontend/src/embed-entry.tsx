@@ -3,6 +3,8 @@ import type { Root } from 'react-dom/client'
 import ChatWidget from './widget/ChatWidget'
 import styles from './index.css?inline'
 
+// we get embed optionn here
+
 export interface EmbedOptions {
   /** Backend base URL, e.g. http://localhost:8000 */
   apiUrl?: string
