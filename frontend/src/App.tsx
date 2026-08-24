@@ -14,7 +14,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
       <h1 className="text-4xl font-bold text-gray-900">SupportIQ</h1>
       <p className="mt-3 max-w-md text-gray-600">
         Agentic RAG customer support. Click the chat bubble in the bottom-right
-        corner to ask a question about AcmeCRM.
+        corner to ask a question about AcmeCRM..
       </p>
       <div className="mt-6 rounded-xl border border-indigo-200 bg-white px-4 py-2 text-sm text-indigo-700">
         Try: &quot;What is the refund window?&quot;
