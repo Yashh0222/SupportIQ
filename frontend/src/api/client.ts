@@ -133,6 +133,10 @@ export async function createCompany(
   return data
 }
 
+export async function deleteCompany(companyId: string): Promise<void> {
+  await api.delete(`/companies/${encodeURIComponent(companyId)}`)
+}
+
 // ─── Upload (authenticated, owner or admin) ─────────────────────────
 
 export async function uploadDocuments(

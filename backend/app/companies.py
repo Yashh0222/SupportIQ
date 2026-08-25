@@ -137,3 +137,15 @@ def create_company(
 def company_raw_docs_dir(company_id: str) -> Path:
     """Directory holding raw documents for a specific company."""
     return COMPANIES_DIR / get_company(company_id).id / "raw_docs"
+
+
+def delete_company(company_id: str) -> bool:
+    """Remove a company from the registry. Built-in companies cannot be deleted."""
+    if company_id in KNOWN_COMPANIES:
+        return False
+    registry = _load_registry()
+    if company_id not in registry:
+        return False
+    del registry[company_id]
+    _save_registry(registry)
+    return True

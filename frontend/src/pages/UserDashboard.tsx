@@ -6,6 +6,7 @@ import ChatWidget from '../widget/ChatWidget'
 import {
   fetchMyCompanies,
   createCompany,
+  deleteCompany,
   submitOriginRequest,
   fetchMyOriginRequests,
   uploadDocuments,
@@ -106,6 +107,19 @@ export default function UserDashboard() {
       setOriginRequests([])
     }
   }, [])
+
+  const onDeleteCompany = async (companyId: string) => {
+    if (!confirm(`Delete company "${companyId}"? This cannot be undone.`)) return
+    try {
+      await deleteCompany(companyId)
+      setSelectedCompany('')
+      void loadCompanies()
+      void loadOriginRequests()
+    } catch (err) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      alert(detail ?? 'Could not delete the company.')
+    }
+  }
 
   useEffect(() => {
     void loadCompanies()
@@ -290,6 +304,12 @@ export default function UserDashboard() {
                       className="rounded bg-gray-100 px-2 py-1 text-[10px] font-semibold text-gray-600 hover:bg-gray-200"
                     >
                       Request Origin
+                    </button>
+                    <button
+                      onClick={() => void onDeleteCompany(c.id)}
+                      className="rounded bg-red-50 px-2 py-1 text-[10px] font-semibold text-red-600 hover:bg-red-100"
+                    >
+                      Delete
                     </button>
                   </div>
 

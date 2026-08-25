@@ -5,11 +5,12 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from app.auth import require_auth
+from app.auth import require_admin, require_auth
 from app.companies import (
     CompanyInfo,
     company_raw_docs_dir,
     create_company,
+    delete_company,
     is_company_owner,
     list_companies,
     list_companies_for_owner,
@@ -89,3 +90,36 @@ def create_company_route(
         "doc_count": 0,
         "owner_id": info.owner_id,
     }
+
+
+@router.delete("/companies/{company_id}")
+def delete_company_route(
+    company_id: str,
+    payload: dict = Depends(require_auth),
+) -> dict:
+    """Delete a company. Owner or admin can delete."""
+    user_id = payload.get("sub", "")
+    role = (payload.get("metadata") or {}).get("role")
+
+    if role != "admin" and not is_company_owner(company_id, user_id):
+        raise HTTPException(status_code=403, detail="Only the company owner or admin can delete this company.")
+
+    if not delete_company(company_id):
+        raise HTTPException(status_code=404, detail="Company not found or is a built-in company.")
+
+    # Clean up files and vector store
+    import shutil
+    from app.config import COMPANIES_DIR as _COMPANIES_DIR
+
+    docs_dir = _COMPANIES_DIR / company_id
+    if docs_dir.exists():
+        shutil.rmtree(docs_dir, ignore_errors=True)
+
+    try:
+        from app.rag.vectorstore import delete_company_collection
+        delete_company_collection(company_id)
+    except Exception:
+        pass
+
+    invalidate_doc_count(company_id)
+    return {"detail": f"Company '{company_id}' deleted."}

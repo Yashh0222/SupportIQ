@@ -6,11 +6,13 @@ import {
   addAllowedOrigin,
   fetchAllowedOrigins,
   fetchAllOriginRequests,
+  fetchCompanies,
   approveOriginRequest,
   rejectOriginRequest,
   removeAllowedOrigin,
+  deleteCompany,
 } from './api/client'
-import type { OriginRequest } from './api/client'
+import type { CompanyInfo, OriginRequest } from './api/client'
 
 export default function App({ onBack }: { onBack?: () => void }) {
   const { isLoaded, userId, sessionClaims } = useAuth()
@@ -24,6 +26,8 @@ export default function App({ onBack }: { onBack?: () => void }) {
   const [requestFilter, setRequestFilter] = useState<string>('pending')
   const [actionBusy, setActionBusy] = useState<string | null>(null)
 
+  const [allCompanies, setAllCompanies] = useState<CompanyInfo[]>([])
+
   const loadOrigins = useCallback(async () => {
     try { setOrigins(await fetchAllowedOrigins()) } catch { setOrigins([]) }
   }, [])
@@ -34,6 +38,12 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
   useEffect(() => { void loadOrigins() }, [loadOrigins])
   useEffect(() => { void loadRequests() }, [loadRequests])
+
+  const loadCompanies = useCallback(async () => {
+    try { setAllCompanies(await fetchCompanies()) } catch { setAllCompanies([]) }
+  }, [])
+
+  useEffect(() => { void loadCompanies() }, [loadCompanies])
 
   const onAddOrigin = async (e: FormEvent) => {
     e.preventDefault()
@@ -81,6 +91,17 @@ export default function App({ onBack }: { onBack?: () => void }) {
       void loadRequests()
     } catch { /* ignore */ }
     setActionBusy(null)
+  }
+
+  const onDeleteCompany = async (companyId: string) => {
+    if (!confirm(`Delete company "${companyId}"? This will remove all its documents and data.`)) return
+    try {
+      await deleteCompany(companyId)
+      void loadCompanies()
+    } catch (err) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      alert(detail ?? 'Could not delete the company.')
+    }
   }
 
   if (!isLoaded) {
@@ -177,6 +198,33 @@ export default function App({ onBack }: { onBack?: () => void }) {
                     </div>
                   )}
                 </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ─── All Companies ──────────────────────────────────────── */}
+      <div className="mt-6 w-full max-w-2xl rounded-2xl border border-indigo-200 bg-white p-6 text-left shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-900">All Companies</h2>
+        <p className="mt-1 text-sm text-gray-500">Manage and delete any company in the system.</p>
+        {allCompanies.length === 0 ? (
+          <p className="mt-4 text-sm text-gray-400">No companies found.</p>
+        ) : (
+          <div className="mt-4 space-y-2">
+            {allCompanies.map((c) => (
+              <div key={c.id} className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">{c.display_name} <span className="font-normal text-gray-400">({c.id})</span></p>
+                  {c.description && <p className="text-xs text-gray-500">{c.description}</p>}
+                  <p className="text-xs text-gray-400">{c.doc_count} documents</p>
+                </div>
+                <button
+                  onClick={() => void onDeleteCompany(c.id)}
+                  className="shrink-0 rounded bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                >
+                  Delete
+                </button>
               </div>
             ))}
           </div>
