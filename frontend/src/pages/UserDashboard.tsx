@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { useAuth } from '@clerk/clerk-react'
 import { Link } from 'react-router-dom'
 import ChatWidget from '../widget/ChatWidget'
 import {
@@ -15,25 +14,6 @@ import type { CompanyInfo, OriginRequest, UploadResult } from '../api/client'
 
 const ACCEPTED = '.md,.txt,.rst,.html,.pdf'
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
-
-function generateWidgetScript(companyId: string): string {
-  const backendUrl = API_URL
-  return `<!-- SupportIQ Chat Widget for ${companyId} -->
-<script>
-  (function() {
-    var s = document.createElement('script');
-    s.src = '${backendUrl}/widget.js';
-    s.async = true;
-    s.onload = function() {
-      window.SupportIQ && window.SupportIQ.init({
-        company: '${companyId}',
-        apiUrl: '${backendUrl}'
-      });
-    };
-    document.head.appendChild(s);
-  })();
-</script>`
-}
 
 function generateEmbedHtml(companyId: string): string {
   const backendUrl = API_URL
@@ -62,8 +42,6 @@ function CopyButton({ text }: { text: string }) {
 }
 
 export default function UserDashboard() {
-  const { userId } = useAuth()
-
   // Companies
   const [companies, setCompanies] = useState<CompanyInfo[]>([])
   const [showCreate, setShowCreate] = useState(false)
