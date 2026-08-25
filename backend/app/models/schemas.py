@@ -15,7 +15,7 @@ class ChatResponse(BaseModel):
     answer: str
     sources: list[str]
     company: str = DEFAULT_COMPANY_ID
-    trace: dict = {}  # {retrieved_chunks, grading, reformulated_query, escalated}
+    trace: dict = {}
 
 
 class CreateCompanyRequest(BaseModel):
@@ -26,3 +26,9 @@ class CreateCompanyRequest(BaseModel):
 
 class AllowedOriginRequest(BaseModel):
     origin: str = Field(min_length=1)
+
+
+class OriginApprovalRequest(BaseModel):
+    origin: str = Field(min_length=1, description="The site origin to request access for")
+    company_id: str = Field(min_length=1, description="The company this origin is for")
+    reason: str = Field(default="", description="Why you need this origin added")

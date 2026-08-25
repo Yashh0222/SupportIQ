@@ -3,14 +3,16 @@
 import time
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
-from app.auth import require_admin
+from app.auth import require_auth
 from app.companies import (
     CompanyInfo,
     company_raw_docs_dir,
     create_company,
+    is_company_owner,
     list_companies,
+    list_companies_for_owner,
 )
 from app.models.schemas import CreateCompanyRequest
 
@@ -50,10 +52,34 @@ def companies() -> list[dict]:
     return result
 
 
-@router.post("/companies", status_code=201, dependencies=[Depends(require_admin)])
-def create_company_route(req: CreateCompanyRequest) -> dict:
+@router.get("/companies/mine")
+def my_companies(payload: dict = Depends(require_auth)) -> list[dict]:
+    """Return companies owned by the current user."""
+    user_id = payload.get("sub", "")
+    result = []
+    for company in list_companies_for_owner(user_id):
+        result.append(
+            {
+                "id": company.id,
+                "display_name": company.display_name,
+                "description": company.description,
+                "doc_count": _doc_count(company.id, company_raw_docs_dir(company.id)),
+            }
+        )
+    return result
+
+
+@router.post("/companies", status_code=201)
+def create_company_route(
+    req: CreateCompanyRequest,
+    payload: dict = Depends(require_auth),
+) -> dict:
+    """Any authenticated user can create a company."""
+    user_id = payload.get("sub", "")
     try:
-        info: CompanyInfo = create_company(req.id, req.display_name, req.description)
+        info: CompanyInfo = create_company(
+            req.id, req.display_name, req.description, owner_id=user_id
+        )
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc))
     return {
@@ -61,4 +87,5 @@ def create_company_route(req: CreateCompanyRequest) -> dict:
         "display_name": info.display_name,
         "description": info.description,
         "doc_count": 0,
+        "owner_id": info.owner_id,
     }

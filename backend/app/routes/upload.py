@@ -1,8 +1,9 @@
 """Document upload endpoint: save files, run ingestion, append to the vector store."""
 
-from fastapi import APIRouter, File, Form, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
-from app.companies import DEFAULT_COMPANY_ID, company_raw_docs_dir
+from app.auth import require_auth
+from app.companies import DEFAULT_COMPANY_ID, company_raw_docs_dir, is_company_owner
 from app.ingestion.chunker import chunk_documents
 from app.ingestion.embedder import get_embedding_model
 from app.ingestion.loader import load_documents
@@ -16,8 +17,22 @@ router = APIRouter(tags=["upload"])
 async def upload(
     files: list[UploadFile] = File(...),
     company: str = Form(DEFAULT_COMPANY_ID),
+    payload: dict = Depends(require_auth),
 ) -> dict:
+    """Authenticated users can upload docs for their own companies.
+    Admins can upload for any company.
+    """
     company_id = company or DEFAULT_COMPANY_ID
+    user_id = payload.get("sub", "")
+    role = (payload.get("metadata") or {}).get("role")
+
+    # Non-admin users can only upload to their own companies
+    if role != "admin" and not is_company_owner(company_id, user_id):
+        raise HTTPException(
+            status_code=403,
+            detail="You can only upload documents to your own companies.",
+        )
+
     company_dir = company_raw_docs_dir(company_id)
     company_dir.mkdir(parents=True, exist_ok=True)
 

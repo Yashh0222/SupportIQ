@@ -4,13 +4,12 @@ Each company owns a raw-docs folder under ``data/companies/<id>/raw_docs/`` and
 its own Chroma collection (see ``app.rag.vectorstore``). The chat assistant
 only ever retrieves from the selected company's collection.
 
-Built-in companies live in ``KNOWN_COMPANIES``. Companies registered by an
-admin through ``POST /companies`` are persisted to ``registry.json`` so they
-survive restarts.
+Built-in companies live in ``KNOWN_COMPANIES``. Companies registered through
+``POST /companies`` are persisted to ``registry.json`` so they survive restarts.
 """
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from app.config import COMPANIES_DIR
@@ -25,6 +24,7 @@ class CompanyInfo:
     id: str
     display_name: str
     description: str
+    owner_id: str = ""
 
 
 KNOWN_COMPANIES: dict[str, CompanyInfo] = {
@@ -42,7 +42,7 @@ KNOWN_COMPANIES: dict[str, CompanyInfo] = {
 
 
 def _load_registry() -> dict[str, CompanyInfo]:
-    """Load admin-registered companies from ``registry.json``."""
+    """Load registered companies from ``registry.json``."""
     if not REGISTRY_FILE.exists():
         return {}
     try:
@@ -50,7 +50,12 @@ def _load_registry() -> dict[str, CompanyInfo]:
     except (json.JSONDecodeError, OSError):
         return {}
     return {
-        cid: CompanyInfo(id=entry["id"], display_name=entry["display_name"], description=entry.get("description", ""))
+        cid: CompanyInfo(
+            id=entry["id"],
+            display_name=entry["display_name"],
+            description=entry.get("description", ""),
+            owner_id=entry.get("owner_id", ""),
+        )
         for cid, entry in raw.items()
     }
 
@@ -58,7 +63,12 @@ def _load_registry() -> dict[str, CompanyInfo]:
 def _save_registry(companies: dict[str, CompanyInfo]) -> None:
     REGISTRY_FILE.parent.mkdir(parents=True, exist_ok=True)
     payload = {
-        cid: {"id": info.id, "display_name": info.display_name, "description": info.description}
+        cid: {
+            "id": info.id,
+            "display_name": info.display_name,
+            "description": info.description,
+            "owner_id": info.owner_id,
+        }
         for cid, info in companies.items()
     }
     REGISTRY_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -80,11 +90,29 @@ def get_company(company_id: str) -> CompanyInfo:
 
 
 def list_companies() -> list[CompanyInfo]:
-    """Built-in companies followed by admin-registered companies."""
+    """Built-in companies followed by registered companies."""
     return [*KNOWN_COMPANIES.values(), *_load_registry().values()]
 
 
-def create_company(company_id: str, display_name: str, description: str) -> CompanyInfo:
+def list_companies_for_owner(owner_id: str) -> list[CompanyInfo]:
+    """Return only companies owned by *owner_id*."""
+    return [c for c in _load_registry().values() if c.owner_id == owner_id]
+
+
+def is_company_owner(company_id: str, user_id: str) -> bool:
+    """Check if *user_id* owns the company (built-in companies have no owner)."""
+    info = _load_registry().get(company_id)
+    if info is None:
+        return False
+    return info.owner_id == user_id
+
+
+def create_company(
+    company_id: str,
+    display_name: str,
+    description: str,
+    owner_id: str = "",
+) -> CompanyInfo:
     """Register a new company and create its raw-docs folder."""
     if not company_id.islower() or not company_id.replace("-", "").isalnum():
         raise ValueError("Company id must be lowercase letters, digits and hyphens only.")
@@ -94,7 +122,12 @@ def create_company(company_id: str, display_name: str, description: str) -> Comp
     if company_id in registry:
         raise ValueError(f"Company '{company_id}' already exists.")
 
-    info = CompanyInfo(id=company_id, display_name=display_name, description=description)
+    info = CompanyInfo(
+        id=company_id,
+        display_name=display_name,
+        description=description,
+        owner_id=owner_id,
+    )
     registry[company_id] = info
     _save_registry(registry)
     company_raw_docs_dir(company_id).mkdir(parents=True, exist_ok=True)

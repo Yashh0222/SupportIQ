@@ -35,6 +35,7 @@ export interface CompanyInfo {
   display_name: string
   description: string
   doc_count: number
+  owner_id?: string
 }
 
 export interface CreateCompanyRequest {
@@ -53,6 +54,18 @@ export interface UploadResponse {
   files: number
   chunks_added: number
   results: UploadResult[]
+}
+
+export interface OriginRequest {
+  id: string
+  user_id: string
+  user_email: string
+  company_id: string
+  origin: string
+  reason: string
+  status: 'pending' | 'approved' | 'rejected'
+  created_at: number
+  resolved_at: number
 }
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
@@ -84,19 +97,43 @@ export function useApiSetup() {
   setTokenProvider(getToken)
 }
 
+// ─── Chat (public) ──────────────────────────────────────────────────
+
 export async function sendMessage(
   message: string,
   conversationId: string,
-  apiUrl?: string,
+  _apiUrl?: string,
   company?: string,
 ): Promise<ChatResponse> {
-  const { data } = await axios.post<ChatResponse>(`${apiUrl ?? API_URL}/chat`, {
+  const { data } = await axios.post<ChatResponse>(`${API_URL}/chat`, {
     message,
     conversation_id: conversationId,
     company,
   } satisfies ChatRequest)
   return data
 }
+
+// ─── Companies (authenticated) ──────────────────────────────────────
+
+export async function fetchCompanies(_apiUrl?: string): Promise<CompanyInfo[]> {
+  const { data } = await api.get<CompanyInfo[]>('/companies')
+  return data
+}
+
+export async function fetchMyCompanies(): Promise<CompanyInfo[]> {
+  const { data } = await api.get<CompanyInfo[]>('/companies/mine')
+  return data
+}
+
+export async function createCompany(
+  payload: CreateCompanyRequest,
+  _apiUrl?: string,
+): Promise<CompanyInfo> {
+  const { data } = await api.post<CompanyInfo>('/companies', payload)
+  return data
+}
+
+// ─── Upload (authenticated, owner or admin) ─────────────────────────
 
 export async function uploadDocuments(
   files: File[],
@@ -110,18 +147,23 @@ export async function uploadDocuments(
   return data
 }
 
-export async function fetchCompanies(_apiUrl?: string): Promise<CompanyInfo[]> {
-  const { data } = await api.get<CompanyInfo[]>('/companies')
+// ─── Origin requests (authenticated user) ──────────────────────────
+
+export async function submitOriginRequest(payload: {
+  origin: string
+  company_id: string
+  reason?: string
+}): Promise<{ id: string; status: string; message: string }> {
+  const { data } = await api.post('/origin-requests', payload)
   return data
 }
 
-export async function createCompany(
-  payload: CreateCompanyRequest,
-  _apiUrl?: string,
-): Promise<CompanyInfo> {
-  const { data } = await api.post<CompanyInfo>('/companies', payload)
+export async function fetchMyOriginRequests(): Promise<OriginRequest[]> {
+  const { data } = await api.get<OriginRequest[]>('/origin-requests/mine')
   return data
 }
+
+// ─── Origins (admin) ───────────────────────────────────────────────
 
 export async function fetchAllowedOrigins(_apiUrl?: string): Promise<string[]> {
   const { data } = await api.get<{ origins: string[] }>('/origins')
@@ -144,4 +186,28 @@ export async function removeAllowedOrigin(
     `/origins/${encodeURIComponent(origin)}`,
   )
   return data.origins
+}
+
+// ─── Admin: origin request management ──────────────────────────────
+
+export async function fetchAllOriginRequests(
+  status?: string,
+): Promise<OriginRequest[]> {
+  const params = status ? { status } : {}
+  const { data } = await api.get<OriginRequest[]>('/admin/origin-requests', { params })
+  return data
+}
+
+export async function approveOriginRequest(
+  requestId: string,
+): Promise<{ message: string }> {
+  const { data } = await api.post(`/admin/origin-requests/${requestId}/approve`)
+  return data
+}
+
+export async function rejectOriginRequest(
+  requestId: string,
+): Promise<{ message: string }> {
+  const { data } = await api.post(`/admin/origin-requests/${requestId}/reject`)
+  return data
 }

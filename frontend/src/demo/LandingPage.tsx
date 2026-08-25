@@ -71,26 +71,12 @@ function Navbar() {
         </Link>
         <div className="flex items-center gap-4">
           <SignedOut>
-            <Link
-              to="/sign-in"
-              className="rounded-full border border-gray-300 px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/sign-up"
-              className="rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700"
-            >
-              Sign Up
-            </Link>
+            <Link to="/sign-in" className="rounded-full border border-gray-300 px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Sign In</Link>
+            <Link to="/sign-up" className="rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700">Sign Up</Link>
           </SignedOut>
           <SignedIn>
-            <Link
-              to="/admin"
-              className="rounded-full border border-indigo-200 px-4 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50"
-            >
-              Admin Panel
-            </Link>
+            <Link to="/dashboard" className="rounded-full border border-indigo-200 px-4 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50">My Dashboard</Link>
+            <Link to="/admin" className="rounded-full border border-gray-200 px-4 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50">Admin</Link>
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
         </div>
@@ -110,9 +96,7 @@ export default function LandingPage() {
       .then((list) => {
         if (list.length > 0) setCompanies(list)
       })
-      .catch(() => {
-        // keep the hardcoded fallback if the backend is unreachable
-      })
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -200,15 +184,12 @@ export default function LandingPage() {
           Chat widget: <span className="font-mono">widget.js</span> embeddable bundle · LangChain +
           LangGraph + FastAPI · ChromaDB · MCP
         </p>
-
-        <SignedIn>
-          <button
-            onClick={() => setShowAdmin(true)}
-            className="mt-3 text-xs font-medium text-indigo-500 hover:text-indigo-700"
-          >
-            Admin: upload documents →
-          </button>
-        </SignedIn>
+        <button
+          onClick={() => setShowAdmin(true)}
+          className="mt-3 text-xs font-medium text-indigo-500 hover:text-indigo-700"
+        >
+          Admin: upload documents →
+        </button>
       </div>
 
       <ChatWidget
