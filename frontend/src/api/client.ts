@@ -100,7 +100,7 @@ export async function sendMessage(
 
 export async function uploadDocuments(
   files: File[],
-  apiUrl?: string,
+  _apiUrl?: string,
   company?: string,
 ): Promise<UploadResponse> {
   const formData = new FormData()
@@ -110,27 +110,27 @@ export async function uploadDocuments(
   return data
 }
 
-export async function fetchCompanies(apiUrl?: string): Promise<CompanyInfo[]> {
+export async function fetchCompanies(_apiUrl?: string): Promise<CompanyInfo[]> {
   const { data } = await api.get<CompanyInfo[]>('/companies')
   return data
 }
 
 export async function createCompany(
   payload: CreateCompanyRequest,
-  apiUrl?: string,
+  _apiUrl?: string,
 ): Promise<CompanyInfo> {
   const { data } = await api.post<CompanyInfo>('/companies', payload)
   return data
 }
 
-export async function fetchAllowedOrigins(apiUrl?: string): Promise<string[]> {
+export async function fetchAllowedOrigins(_apiUrl?: string): Promise<string[]> {
   const { data } = await api.get<{ origins: string[] }>('/origins')
   return data.origins
 }
 
 export async function addAllowedOrigin(
   origin: string,
-  apiUrl?: string,
+  _apiUrl?: string,
 ): Promise<string[]> {
   const { data } = await api.post<{ origins: string[] }>('/origins', { origin })
   return data.origins
@@ -138,7 +138,7 @@ export async function addAllowedOrigin(
 
 export async function removeAllowedOrigin(
   origin: string,
-  apiUrl?: string,
+  _apiUrl?: string,
 ): Promise<string[]> {
   const { data } = await api.delete<{ origins: string[] }>(
     `/origins/${encodeURIComponent(origin)}`,
