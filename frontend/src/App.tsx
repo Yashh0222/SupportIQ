@@ -77,9 +77,11 @@ export default function App({ onBack }: { onBack?: () => void }) {
   const onApprove = async (requestId: string) => {
     setActionBusy(requestId)
     try {
-      await approveOriginRequest(requestId)
+      const result = await approveOriginRequest(requestId) as { origin: string; message: string }
+      if (result.origin && !origins.includes(result.origin)) {
+        setOrigins((prev) => [...prev, result.origin].sort())
+      }
       void loadRequests()
-      void loadOrigins()
     } catch { /* ignore */ }
     setActionBusy(null)
   }
