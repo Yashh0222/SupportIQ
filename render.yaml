@@ -18,3 +18,7 @@ services:
         value: "supportiq"
       - key: PYTHON_VERSION
         value: "3.11"
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: CLERK_AUTHORIZED_PARTIES
+        sync: false
