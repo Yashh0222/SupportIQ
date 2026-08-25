@@ -9,8 +9,8 @@ import {
   approveOriginRequest,
   rejectOriginRequest,
   removeAllowedOrigin,
-} from '../api/client'
-import type { OriginRequest } from '../api/client'
+} from './api/client'
+import type { OriginRequest } from './api/client'
 
 export default function App({ onBack }: { onBack?: () => void }) {
   const { isLoaded, userId, sessionClaims } = useAuth()

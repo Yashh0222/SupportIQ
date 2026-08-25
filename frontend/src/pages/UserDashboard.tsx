@@ -92,13 +92,11 @@ export default function UserDashboard() {
     try {
       const list = await fetchMyCompanies()
       setCompanies(list)
-      if (list.length > 0 && !selectedCompany) {
-        setSelectedCompany(list[0].id)
-      }
+      setSelectedCompany((prev) => (prev && list.some((c) => c.id === prev) ? prev : list[0]?.id ?? ''))
     } catch {
       setCompanies([])
     }
-  }, [selectedCompany])
+  }, [])
 
   const loadOriginRequests = useCallback(async () => {
     try {
@@ -165,6 +163,7 @@ export default function UserDashboard() {
       })
       setOriginMessage(result.message)
       setOriginForm({ origin: '', reason: '' })
+      setShowOriginForm(null)
       void loadOriginRequests()
     } catch (err) {
       const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
