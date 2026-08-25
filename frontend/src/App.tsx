@@ -1,6 +1,43 @@
+import { useAuth } from '@clerk/clerk-react'
+import { Navigate } from 'react-router-dom'
 import UploadPanel from './admin/UploadPanel'
 
 export default function App({ onBack }: { onBack?: () => void }) {
+  const { isLoaded, userId, sessionClaims } = useAuth()
+
+  if (!isLoaded) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-sm text-gray-500">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!userId) {
+    return <Navigate to="/sign-in" replace />
+  }
+
+  const role = (sessionClaims as Record<string, unknown> | null)?.metadata
+  const metadata = role && typeof role === 'object' ? (role as Record<string, unknown>) : null
+  if (metadata?.role !== 'admin') {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900">Admin Access Required</h2>
+          <p className="mt-2 text-sm text-gray-500">
+            You need admin privileges to access this page.
+          </p>
+          <a
+            href="/"
+            className="mt-4 inline-block rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+          >
+            Back to Home
+          </a>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center bg-gradient-to-br from-indigo-50 to-white px-6 py-12 text-center">
       {onBack && (

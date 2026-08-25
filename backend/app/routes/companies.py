@@ -3,8 +3,9 @@
 import time
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from app.auth import require_admin
 from app.companies import (
     CompanyInfo,
     company_raw_docs_dir,
@@ -49,7 +50,7 @@ def companies() -> list[dict]:
     return result
 
 
-@router.post("/companies", status_code=201)
+@router.post("/companies", status_code=201, dependencies=[Depends(require_admin)])
 def create_company_route(req: CreateCompanyRequest) -> dict:
     try:
         info: CompanyInfo = create_company(req.id, req.display_name, req.description)

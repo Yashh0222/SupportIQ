@@ -1,6 +1,7 @@
 // Added axios
-// Modified existing and configured axios with types and interfaces for api 
+// Modified existing and configured axios with types and interfaces for api
 import axios from 'axios'
+import { useAuth } from '@clerk/clerk-react'
 
 export interface ToolCall {
   name: string
@@ -56,6 +57,33 @@ export interface UploadResponse {
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
+// Axios instance that attaches the Clerk session token to every request
+const api = axios.create({
+  baseURL: API_URL,
+})
+
+// Hook-based token provider — must be used inside a React component or via a setter
+let tokenProvider: (() => Promise<string | null>) | null = null
+
+export function setTokenProvider(provider: () => Promise<string | null>) {
+  tokenProvider = provider
+}
+
+api.interceptors.request.use(async (config) => {
+  if (tokenProvider) {
+    const token = await tokenProvider()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+  }
+  return config
+})
+
+export function useApiSetup() {
+  const { getToken } = useAuth()
+  setTokenProvider(getToken)
+}
+
 export async function sendMessage(
   message: string,
   conversationId: string,
@@ -78,12 +106,12 @@ export async function uploadDocuments(
   const formData = new FormData()
   files.forEach((file) => formData.append('files', file))
   if (company) formData.append('company', company)
-  const { data } = await axios.post<UploadResponse>(`${apiUrl ?? API_URL}/upload`, formData)
+  const { data } = await api.post<UploadResponse>('/upload', formData)
   return data
 }
 
 export async function fetchCompanies(apiUrl?: string): Promise<CompanyInfo[]> {
-  const { data } = await axios.get<CompanyInfo[]>(`${apiUrl ?? API_URL}/companies`)
+  const { data } = await api.get<CompanyInfo[]>('/companies')
   return data
 }
 
@@ -91,17 +119,12 @@ export async function createCompany(
   payload: CreateCompanyRequest,
   apiUrl?: string,
 ): Promise<CompanyInfo> {
-  const { data } = await axios.post<CompanyInfo>(
-    `${apiUrl ?? API_URL}/companies`,
-    payload,
-  )
+  const { data } = await api.post<CompanyInfo>('/companies', payload)
   return data
 }
 
 export async function fetchAllowedOrigins(apiUrl?: string): Promise<string[]> {
-  const { data } = await axios.get<{ origins: string[] }>(
-    `${apiUrl ?? API_URL}/origins`,
-  )
+  const { data } = await api.get<{ origins: string[] }>('/origins')
   return data.origins
 }
 
@@ -109,10 +132,7 @@ export async function addAllowedOrigin(
   origin: string,
   apiUrl?: string,
 ): Promise<string[]> {
-  const { data } = await axios.post<{ origins: string[] }>(
-    `${apiUrl ?? API_URL}/origins`,
-    { origin },
-  )
+  const { data } = await api.post<{ origins: string[] }>('/origins', { origin })
   return data.origins
 }
 
@@ -120,8 +140,8 @@ export async function removeAllowedOrigin(
   origin: string,
   apiUrl?: string,
 ): Promise<string[]> {
-  const { data } = await axios.delete<{ origins: string[] }>(
-    `${apiUrl ?? API_URL}/origins/${encodeURIComponent(origin)}`,
+  const { data } = await api.delete<{ origins: string[] }>(
+    `/origins/${encodeURIComponent(origin)}`,
   )
   return data.origins
 }

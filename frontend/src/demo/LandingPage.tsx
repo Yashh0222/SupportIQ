@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
+import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
+import { Link } from 'react-router-dom'
 import App from '../App'
 import ChatWidget from '../widget/ChatWidget'
-import { fetchCompanies } from '../api/client'
+import { fetchCompanies, useApiSetup } from '../api/client'
 import type { CompanyInfo } from '../api/client'
 
 const DEFAULT_COMPANIES: CompanyInfo[] = [
@@ -60,7 +62,45 @@ function ArchitectureDiagram() {
   )
 }
 
+function Navbar() {
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
+      <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3">
+        <Link to="/" className="text-lg font-bold text-gray-900">
+          Support<span className="text-indigo-600">IQ</span>
+        </Link>
+        <div className="flex items-center gap-4">
+          <SignedOut>
+            <Link
+              to="/sign-in"
+              className="rounded-full border border-gray-300 px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/sign-up"
+              className="rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700"
+            >
+              Sign Up
+            </Link>
+          </SignedOut>
+          <SignedIn>
+            <Link
+              to="/admin"
+              className="rounded-full border border-indigo-200 px-4 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50"
+            >
+              Admin Panel
+            </Link>
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
+        </div>
+      </div>
+    </nav>
+  )
+}
+
 export default function LandingPage() {
+  useApiSetup()
   const [companies, setCompanies] = useState<CompanyInfo[]>(DEFAULT_COMPANIES)
   const [companyId, setCompanyId] = useState('acmecrm')
   const [showAdmin, setShowAdmin] = useState(false)
@@ -96,7 +136,9 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-100 text-gray-900">
-      <div className="mx-auto max-w-4xl px-6 py-14 text-center">
+      <Navbar />
+
+      <div className="mx-auto max-w-4xl px-6 pt-20 pb-14 text-center">
         <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">
           Agentic RAG customer support
         </p>
@@ -158,12 +200,15 @@ export default function LandingPage() {
           Chat widget: <span className="font-mono">widget.js</span> embeddable bundle · LangChain +
           LangGraph + FastAPI · ChromaDB · MCP
         </p>
-        <button
-          onClick={() => setShowAdmin(true)}
-          className="mt-3 text-xs font-medium text-indigo-500 hover:text-indigo-700"
-        >
-          Admin: upload documents →
-        </button>
+
+        <SignedIn>
+          <button
+            onClick={() => setShowAdmin(true)}
+            className="mt-3 text-xs font-medium text-indigo-500 hover:text-indigo-700"
+          >
+            Admin: upload documents →
+          </button>
+        </SignedIn>
       </div>
 
       <ChatWidget
