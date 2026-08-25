@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
+import { SignedIn, SignedOut, UserButton, useAuth } from '@clerk/clerk-react'
 import { Link } from 'react-router-dom'
 import App from '../App'
 import ChatWidget from '../widget/ChatWidget'
@@ -63,6 +63,11 @@ function ArchitectureDiagram() {
 }
 
 function Navbar() {
+  const { sessionClaims } = useAuth()
+  const role = (sessionClaims as Record<string, unknown> | null)?.metadata
+  const metadata = role && typeof role === 'object' ? (role as Record<string, unknown>) : null
+  const isAdmin = metadata?.role === 'admin'
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3">
@@ -76,7 +81,9 @@ function Navbar() {
           </SignedOut>
           <SignedIn>
             <Link to="/dashboard" className="rounded-full border border-indigo-200 px-4 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50">My Dashboard</Link>
-            <Link to="/admin" className="rounded-full border border-gray-200 px-4 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50">Admin</Link>
+            {isAdmin && (
+              <Link to="/admin" className="rounded-full border border-gray-200 px-4 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50">Admin</Link>
+            )}
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
         </div>
