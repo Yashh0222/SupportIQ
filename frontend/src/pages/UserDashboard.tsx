@@ -42,7 +42,7 @@ function CopyButton({ text }: { text: string }) {
 }
 
 export default function UserDashboard() {
-  // Companies
+  // Companies added 
   const [companies, setCompanies] = useState<CompanyInfo[]>([])
   const [showCreate, setShowCreate] = useState(false)
   const [newCompany, setNewCompany] = useState({ id: '', display_name: '', description: '' })
