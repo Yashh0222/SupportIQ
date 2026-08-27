@@ -1,5 +1,7 @@
 """SupportIQ FastAPI application entry point."""
 
+import asyncio
+
 from fastapi import Depends, FastAPI
 
 from app.auth import require_admin, require_auth
@@ -10,7 +12,7 @@ from app.routes.origin_requests import router as origin_requests_router
 from app.routes.origins import router as origins_router
 from app.routes.upload import router as upload_router
 
-app = FastAPI(title="SupportIQ", version="0.4.0")
+app = FastAPI(title="SupportIQ", version="0.5.0")
 
 app.add_middleware(DynamicCorsMiddleware)
 
@@ -26,6 +28,17 @@ app.include_router(upload_router)
 
 # Admin-only routes
 app.include_router(origins_router, dependencies=[Depends(require_admin)])
+
+
+@app.on_event("startup")
+async def on_startup() -> None:
+    """Rebuild vector collections from GridFS (only if MongoDB is configured)."""
+    try:
+        from app.rag.reingest import run_reingest
+
+        asyncio.create_task(run_reingest())
+    except Exception:
+        pass
 
 
 @app.get("/")

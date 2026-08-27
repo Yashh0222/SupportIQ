@@ -2,9 +2,8 @@
 
 Replaces the static ``ALLOWED_ORIGINS`` env list: admins manage which site
 origins may call the API from the admin panel. Origins are persisted to
-``data/companies/allowed_origins.json`` so they survive restarts. On first
-run the registry is seeded from the ``ALLOWED_ORIGINS`` env var so existing
-deployments keep working after the upgrade.
+MongoDB (collection ``origins``) so they survive restarts. If MongoDB is not
+configured, a legacy ``allowed_origins.json`` file is used.
 """
 
 import json
@@ -12,6 +11,7 @@ import os
 import re
 
 from app.config import COMPANIES_DIR
+from app.db import get_db
 
 ORIGINS_FILE = COMPANIES_DIR / "allowed_origins.json"
 
@@ -34,12 +34,20 @@ def _validate(origin: str) -> str:
     return origin
 
 
-def _save(origins: list[str]) -> None:
-    ORIGINS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    ORIGINS_FILE.write_text(json.dumps(sorted(origins), indent=2), encoding="utf-8")
+def _collection():
+    db = get_db()
+    return db["origins"] if db is not None else None
 
 
 def _load() -> list[str]:
+    """Load the allowed-origin list from MongoDB (or legacy JSON file)."""
+    coll = _collection()
+    if coll is not None:
+        return [doc["origin"] for doc in coll.find({})]
+    return _load_json()
+
+
+def _load_json() -> list[str]:
     if ORIGINS_FILE.exists():
         try:
             return json.loads(ORIGINS_FILE.read_text(encoding="utf-8"))
@@ -50,8 +58,21 @@ def _load() -> list[str]:
         for o in os.getenv("ALLOWED_ORIGINS", _DEFAULT_ORIGINS_ENV).split(",")
         if o.strip()
     ]
-    _save(seed)
+    ORIGINS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    ORIGINS_FILE.write_text(json.dumps(sorted(seed), indent=2), encoding="utf-8")
     return seed
+
+
+def _save(origins: list[str]) -> None:
+    """Persist the allowed-origin list to the active store."""
+    coll = _collection()
+    if coll is not None:
+        coll.delete_many({})
+        if origins:
+            coll.insert_many([{"origin": o} for o in origins])
+        return
+    ORIGINS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    ORIGINS_FILE.write_text(json.dumps(sorted(origins), indent=2), encoding="utf-8")
 
 
 def list_origins() -> list[str]:

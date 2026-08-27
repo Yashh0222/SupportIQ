@@ -5,14 +5,17 @@ its own Chroma collection (see ``app.rag.vectorstore``). The chat assistant
 only ever retrieves from the selected company's collection.
 
 Built-in companies live in ``KNOWN_COMPANIES``. Companies registered through
-``POST /companies`` are persisted to ``registry.json`` so they survive restarts.
+``POST /companies`` are persisted to MongoDB (collection ``companies``) so they
+survive restarts. If MongoDB is not configured, a legacy ``registry.json``
+fallback is used so the app keeps working locally.
 """
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 from app.config import COMPANIES_DIR
+from app.db import get_db
 
 DEFAULT_COMPANY_ID = "acmecrm"
 
@@ -41,8 +44,33 @@ KNOWN_COMPANIES: dict[str, CompanyInfo] = {
 }
 
 
+def _collection():
+    db = get_db()
+    return db["companies"] if db is not None else None
+
+
+def _doc_to_info(doc: dict) -> CompanyInfo:
+    return CompanyInfo(
+        id=doc["id"],
+        display_name=doc.get("display_name", doc["id"]),
+        description=doc.get("description", ""),
+        owner_id=doc.get("owner_id", ""),
+    )
+
+
 def _load_registry() -> dict[str, CompanyInfo]:
-    """Load registered companies from ``registry.json``."""
+    """Load registered companies from MongoDB (or legacy registry.json)."""
+    coll = _collection()
+    if coll is not None:
+        return {
+            doc["id"]: _doc_to_info(doc)
+            for doc in coll.find({})
+        }
+    return _load_registry_json()
+
+
+def _load_registry_json() -> dict[str, CompanyInfo]:
+    """Legacy fallback: load companies from ``registry.json``."""
     if not REGISTRY_FILE.exists():
         return {}
     try:
@@ -61,6 +89,26 @@ def _load_registry() -> dict[str, CompanyInfo]:
 
 
 def _save_registry(companies: dict[str, CompanyInfo]) -> None:
+    """Persist the registered-company map to the active store."""
+    coll = _collection()
+    if coll is not None:
+        for info in companies.values():
+            coll.update_one(
+                {"id": info.id},
+                {
+                    "$set": {
+                        "id": info.id,
+                        "display_name": info.display_name,
+                        "description": info.description,
+                        "owner_id": info.owner_id,
+                    }
+                },
+                upsert=True,
+            )
+        # Remove entries that no longer exist
+        ids = {c.id for c in companies.values()}
+        coll.delete_many({"id": {"$nin": list(ids)}})
+        return
     REGISTRY_FILE.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         cid: {

@@ -13,5 +13,6 @@ chromadb
 python-multipart
 python-dotenv
 pypdf
+pymongo
 mcp>=1.0,<2.0
 clerk-backend-api

@@ -1,14 +1,219 @@
-INFO:     Started server process [9036]
+INFO:     Started server process [7976]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-[08/22/26 23:25:27] INFO     Processing request of type           server.py:733
-                             CallToolRequest                                   
-                    INFO     Processing request of type           server.py:733
-                             ListToolsRequest                                  
-INFO:     127.0.0.1:2596 - "POST /chat HTTP/1.1" 200 OK
-[08/22/26 23:25:32] INFO     Processing request of type           server.py:733
-                             CallToolRequest                                   
-                    INFO     Processing request of type           server.py:733
-                             ListToolsRequest                                  
-INFO:     127.0.0.1:2602 - "POST /chat HTTP/1.1" 200 OK
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:4504 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4506 - "GET /origins HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:4508 - "GET /companies/mine HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:4510 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3411 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:6489 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:11528 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:4674 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:3411 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3411 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3411 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3411 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5451 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:5451 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:5451 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:5451 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:5451 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5451 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5451 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5451 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5451 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:11933 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:6126 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:7071 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:5451 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5451 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11933 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11933 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6073 - "GET /companies/mine HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:1729 - "GET /origin-requests/mine HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:6073 - "GET /companies/mine HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:1729 - "GET /origin-requests/mine HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:12414 - "POST /companies HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:8301 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8301 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8301 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8301 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8301 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8301 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8301 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8301 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4123 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1427 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:10142 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:13605 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1427 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4123 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1427 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4123 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12460 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:4666 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:3052 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1503 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:4666 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12460 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1503 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12460 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8633 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:5923 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1753 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:12799 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:5923 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8633 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5923 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8633 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10601 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:10601 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:10601 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:10601 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:10601 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10601 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10601 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10601 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10601 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1165 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8146 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:7212 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1165 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10601 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1165 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10601 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13128 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:13128 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:13128 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:13128 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:13128 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13128 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13128 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13128 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13128 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:7073 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:2198 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8509 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:13128 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13128 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13128 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13128 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13128 - "OPTIONS /origins HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8509 - "OPTIONS /admin/origin-requests?status=pending HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:2198 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:7073 - "OPTIONS /origins HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:2136 - "OPTIONS /admin/origin-requests?status=pending HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:6894 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8509 - "GET /admin/origin-requests?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8509 - "GET /admin/origin-requests?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2198 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2198 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13128 - "GET /origins HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13128 - "GET /origins HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5972 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1586 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:13555 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:3447 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:5972 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5972 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5972 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5972 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5972 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:3447 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:13555 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1586 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:5972 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3447 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1586 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3447 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1667 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1667 - "POST /companies HTTP/1.1" 201 Created
+INFO:     127.0.0.1:1667 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1667 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6815 - "OPTIONS /origin-requests HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:6815 - "POST /origin-requests HTTP/1.1" 201 Created
+INFO:     127.0.0.1:6815 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:6815 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8672 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:9913 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:7671 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:14349 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8672 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8672 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8672 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8672 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8672 - "OPTIONS /origins HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:14349 - "OPTIONS /admin/origin-requests?status=pending HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:7671 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:9913 - "OPTIONS /origins HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:2071 - "OPTIONS /admin/origin-requests?status=pending HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8672 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:14349 - "GET /origins HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7671 - "GET /admin/origin-requests?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7671 - "GET /admin/origin-requests?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8672 - "GET /origins HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9913 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9913 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3158 - "OPTIONS /admin/origin-requests/or_cfe75f7df99b/approve HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:3158 - "POST /admin/origin-requests/or_cfe75f7df99b/approve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3158 - "OPTIONS /admin/origin-requests?status=pending HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:3158 - "GET /admin/origin-requests?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6398 - "OPTIONS /upload HTTP/1.1" 204 No Content
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|##########| 103/103 [00:00<00:00, 3109.51it/s]
+INFO:     127.0.0.1:6398 - "POST /upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6398 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:6398 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1610 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:2225 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:5325 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:14933 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1610 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1610 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1610 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1610 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11054 - "OPTIONS /chat HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:11054 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8201 - "OPTIONS /origins HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:12258 - "OPTIONS /admin/origin-requests?status=pending HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8828 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8892 - "OPTIONS /origins HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1731 - "OPTIONS /admin/origin-requests?status=pending HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:2512 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8828 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8828 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12258 - "GET /admin/origin-requests?status=pending HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:8201 - "GET /origins HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:8201 - "GET /origins HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:12258 - "GET /admin/origin-requests?status=pending HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:12258 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8201 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8828 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:2512 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:12258 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12258 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12258 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12258 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12258 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:2512 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8828 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:8201 - "OPTIONS /origin-requests/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:2512 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12258 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2512 - "GET /origin-requests/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12258 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1721 - "OPTIONS /upload HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1721 - "POST /upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1721 - "OPTIONS /companies/mine HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:1721 - "GET /companies/mine HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14237 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:14237 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:14237 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:14237 - "OPTIONS /companies HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:14237 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14237 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14237 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14237 - "GET /companies HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9068 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10684 - "POST /chat HTTP/1.1" 200 OK

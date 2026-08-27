@@ -4,7 +4,9 @@ When a user creates a company and wants to embed the widget on their site,
 they submit an origin request. The admin reviews and approves it, which
 adds the origin to the allowed list.
 
-Data is persisted to ``data/companies/origin_requests.json``.
+Requests are persisted to MongoDB (collection ``origin_requests``). If
+MongoDB is not configured, a legacy ``data/companies/origin_requests.json``
+fallback is used.
 """
 
 import json
@@ -13,6 +15,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from app.config import COMPANIES_DIR
+from app.db import get_db
 
 REQUESTS_FILE = COMPANIES_DIR / "origin_requests.json"
 
@@ -30,7 +33,20 @@ class OriginRequest:
     resolved_at: float = 0.0
 
 
+def _collection():
+    db = get_db()
+    return db["origin_requests"] if db is not None else None
+
+
 def _load_requests() -> list[dict]:
+    """Load all requests from MongoDB (or legacy JSON file)."""
+    coll = _collection()
+    if coll is not None:
+        return list(coll.find({}, {"_id": 0}))
+    return _load_json()
+
+
+def _load_json() -> list[dict]:
     if not REQUESTS_FILE.exists():
         return []
     try:
@@ -40,6 +56,15 @@ def _load_requests() -> list[dict]:
 
 
 def _save_requests(requests: list[dict]) -> None:
+    """Persist requests to the active store."""
+    coll = _collection()
+    if coll is not None:
+        for req in requests:
+            coll.update_one({"id": req["id"]}, {"$set": req}, upsert=True)
+        # Remove deleted entries
+        ids = [r["id"] for r in requests]
+        coll.delete_many({"id": {"$nin": ids}})
+        return
     REQUESTS_FILE.parent.mkdir(parents=True, exist_ok=True)
     REQUESTS_FILE.write_text(json.dumps(requests, indent=2), encoding="utf-8")
 

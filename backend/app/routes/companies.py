@@ -15,6 +15,7 @@ from app.companies import (
     list_companies,
     list_companies_for_owner,
 )
+from app.documents import count_documents
 from app.models.schemas import CreateCompanyRequest
 
 router = APIRouter(tags=["companies"])
@@ -28,7 +29,10 @@ def _doc_count(company_id: str, docs_dir: Path) -> int:
     cached = _doc_count_cache.get(company_id)
     if cached is not None and now - cached[0] < _DOC_COUNT_TTL_SECONDS:
         return cached[1]
-    count = len([p for p in docs_dir.rglob("*") if p.is_file()]) if docs_dir.exists() else 0
+    count = count_documents(company_id)
+    if count == 0 and docs_dir.exists():
+        # fallback for legacy disk-only storage
+        count = len([p for p in docs_dir.rglob("*") if p.is_file()])
     _doc_count_cache[company_id] = (now, count)
     return count
 
@@ -107,9 +111,12 @@ def delete_company_route(
     if not delete_company(company_id):
         raise HTTPException(status_code=404, detail="Company not found or is a built-in company.")
 
-    # Clean up files and vector store
+    # Clean up files, vector store, and persistent documents
     import shutil
     from app.config import COMPANIES_DIR as _COMPANIES_DIR
+    from app.documents import delete_company_documents
+
+    delete_company_documents(company_id)
 
     docs_dir = _COMPANIES_DIR / company_id
     if docs_dir.exists():

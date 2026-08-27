@@ -3,10 +3,15 @@
 import os
 from typing import Annotated
 
+from dotenv import load_dotenv
+from pathlib import Path
+
 from fastapi import Depends, HTTPException, Request
 from clerk_backend_api import Clerk
 from clerk_backend_api.security import authenticate_request
 from clerk_backend_api.security.types import AuthenticateRequestOptions
+
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 CLERK_SECRET_KEY = os.environ.get("CLERK_SECRET_KEY", "")
 CLERK_AUTHORIZED_PARTIES = [

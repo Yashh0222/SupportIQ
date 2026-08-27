@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from app.auth import require_auth
 from app.companies import DEFAULT_COMPANY_ID, company_raw_docs_dir, is_company_owner
+from app.documents import save_document
 from app.ingestion.chunker import chunk_documents
 from app.ingestion.embedder import get_embedding_model
 from app.ingestion.loader import load_documents
@@ -40,8 +41,15 @@ async def upload(
 
     results: list[dict] = []
     for file in files:
+        raw = await file.read()
+        # Persist to MongoDB GridFS so uploads survive restarts
+        try:
+            save_document(company_id, file.filename, raw)
+        except Exception:
+            pass  # fall back to disk-only storage if MongoDB is unavailable
+
         dest = company_dir / file.filename
-        dest.write_bytes(await file.read())
+        dest.write_bytes(raw)
 
         docs = load_documents(str(dest))
         chunks = chunk_documents(docs)

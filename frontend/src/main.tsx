@@ -8,12 +8,19 @@ import SignInPage from './pages/SignInPage'
 import SignUpPage from './pages/SignUpPage'
 import UserDashboard from './pages/UserDashboard'
 import App from './App'
+import { useApiSetup } from './api/client'
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+
+function ClerkTokenBridge() {
+  useApiSetup()
+  return null
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ClerkProvider publishableKey={clerkPubKey}>
+      <ClerkTokenBridge />
       <BrowserRouter>
         <Routes>
           <Route path="/sign-in/*" element={<SignInPage />} />
