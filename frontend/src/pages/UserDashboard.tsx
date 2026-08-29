@@ -44,6 +44,7 @@ function CopyButton({ text }: { text: string }) {
 export default function UserDashboard() {
   // Companies added 
   const [companies, setCompanies] = useState<CompanyInfo[]>([])
+  const [companiesLoading, setCompaniesLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
   const [newCompany, setNewCompany] = useState({ id: '', display_name: '', description: '' })
   const [creating, setCreating] = useState(false)
@@ -68,12 +69,15 @@ export default function UserDashboard() {
   const [originMessage, setOriginMessage] = useState<string | null>(null)
 
   const loadCompanies = useCallback(async () => {
+    setCompaniesLoading(true)
     try {
       const list = await fetchMyCompanies()
       setCompanies(list)
       setSelectedCompany((prev) => (prev && list.some((c) => c.id === prev) ? prev : list[0]?.id ?? ''))
     } catch {
       setCompanies([])
+    } finally {
+      setCompaniesLoading(false)
     }
   }, [])
 
@@ -246,7 +250,12 @@ export default function UserDashboard() {
             </div>
           )}
 
-          {companies.length === 0 ? (
+          {companiesLoading ? (
+            <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
+              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+              Loading companies…
+            </div>
+          ) : companies.length === 0 ? (
             <p className="mt-4 text-sm text-gray-400">No companies yet. Create one to get started!</p>
           ) : (
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

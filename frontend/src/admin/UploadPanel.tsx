@@ -43,6 +43,7 @@ function cacheCompanies(list: CompanyInfo[]) {
 
 export default function UploadPanel() {
   const [companies, setCompanies] = useState<CompanyInfo[]>(readCachedCompanies)
+  const [companiesLoading, setCompaniesLoading] = useState(true)
   const [selected, setSelected] = useState(DEFAULT_COMPANY)
   const [files, setFiles] = useState<File[]>([])
   const [state, setState] = useState<UploadState>({ status: 'idle' })
@@ -60,6 +61,7 @@ export default function UploadPanel() {
   const formRef = useRef<HTMLFormElement>(null)
 
   const loadCompanies = useCallback(async () => {
+    setCompaniesLoading(true)
     try {
       const list = await fetchCompanies()
       setCompanies(list)
@@ -71,6 +73,8 @@ export default function UploadPanel() {
       setSelected((prev) =>
         cached.some((c) => c.id === prev) ? prev : (cached[0]?.id ?? DEFAULT_COMPANY),
       )
+    } finally {
+      setCompaniesLoading(false)
     }
   }, [])
 
@@ -172,8 +176,10 @@ export default function UploadPanel() {
             value={selected}
             onChange={(e) => setSelected(e.target.value)}
             className="flex-1 rounded-full border border-gray-300 px-3.5 py-2 text-sm outline-none focus:border-indigo-500"
+            disabled={companiesLoading}
           >
-            {companies.length === 0 && <option value={DEFAULT_COMPANY}>AcmeCRM (default)</option>}
+            {companiesLoading && <option>Loading companies…</option>}
+            {!companiesLoading && companies.length === 0 && <option value={DEFAULT_COMPANY}>AcmeCRM (default)</option>}
             {companies.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.display_name} ({c.id}) — {c.doc_count} docs
@@ -183,7 +189,8 @@ export default function UploadPanel() {
           <button
             type="button"
             onClick={() => setShowCreate((v) => !v)}
-            className="whitespace-nowrap rounded-full border border-indigo-300 px-3 py-2 text-xs font-semibold text-indigo-600 hover:bg-indigo-50"
+            disabled={companiesLoading}
+            className="whitespace-nowrap rounded-full border border-indigo-300 px-3 py-2 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 disabled:opacity-50"
           >
             {showCreate ? 'Cancel' : '+ New company'}
           </button>
