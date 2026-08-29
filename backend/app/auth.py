@@ -1,8 +1,8 @@
 """Clerk authentication dependencies for FastAPI routes."""
 
+# Updated for clerk-backend-api v2.2.0+    
 import os
 from typing import Annotated
-
 from dotenv import load_dotenv
 from pathlib import Path
 
