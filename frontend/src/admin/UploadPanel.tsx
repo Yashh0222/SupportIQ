@@ -7,6 +7,7 @@ import {
   fetchCompanies,
   removeAllowedOrigin,
   uploadDocuments,
+  invalidateCompaniesCache,
 } from '../api/client'
 import type { CompanyInfo, UploadResult } from '../api/client'
 
@@ -130,6 +131,7 @@ export default function UploadPanel() {
     setState({ status: 'uploading' })
     try {
       const res = await uploadDocuments(files, undefined, selected)
+      invalidateCompaniesCache()
       setState({ status: 'success', results: res.results })
       formRef.current?.reset()
       setFiles([])
@@ -149,6 +151,7 @@ export default function UploadPanel() {
     setCreateError(null)
     try {
       const created = await createCompany(newCompany)
+      invalidateCompaniesCache()
       await loadCompanies()
       setSelected(created.id)
       setShowCreate(false)

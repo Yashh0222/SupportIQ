@@ -11,6 +11,7 @@ import {
   rejectOriginRequest,
   removeAllowedOrigin,
   deleteCompany,
+  invalidateCompaniesCache,
 } from './api/client'
 import type { CompanyInfo, OriginRequest } from './api/client'
 
@@ -99,6 +100,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
     if (!confirm(`Delete company "${companyId}"? This will remove all its documents and data.`)) return
     try {
       await deleteCompany(companyId)
+      invalidateCompaniesCache()
       void loadCompanies()
     } catch (err) {
       const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail

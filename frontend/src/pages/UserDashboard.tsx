@@ -9,6 +9,7 @@ import {
   submitOriginRequest,
   fetchMyOriginRequests,
   uploadDocuments,
+  invalidateCompaniesCache,
 } from '../api/client'
 import type { CompanyInfo, OriginRequest, UploadResult } from '../api/client'
 
@@ -94,6 +95,7 @@ export default function UserDashboard() {
     if (!confirm(`Delete company "${companyId}"? This cannot be undone.`)) return
     try {
       await deleteCompany(companyId)
+      invalidateCompaniesCache()
       setSelectedCompany('')
       void loadCompanies()
       void loadOriginRequests()
@@ -115,6 +117,7 @@ export default function UserDashboard() {
     setCreateError(null)
     try {
       const created = await createCompany(newCompany)
+      invalidateCompaniesCache()
       setCreatedCompanyId(created.id)
       await loadCompanies()
       setSelectedCompany(created.id)
@@ -135,6 +138,7 @@ export default function UserDashboard() {
     setUploadError(null)
     try {
       const res = await uploadDocuments(files, undefined, selectedCompany)
+      invalidateCompaniesCache()
       setUploadResults(res.results)
       setUploadState('success')
       setFiles([])

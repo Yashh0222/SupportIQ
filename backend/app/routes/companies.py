@@ -15,7 +15,7 @@ from app.companies import (
     list_companies,
     list_companies_for_owner,
 )
-from app.documents import count_documents
+from app.documents import count_documents_batch
 from app.models.schemas import CreateCompanyRequest
 
 router = APIRouter(tags=["companies"])
@@ -24,54 +24,74 @@ _DOC_COUNT_TTL_SECONDS = 60.0
 _doc_count_cache: dict[str, tuple[float, int]] = {}
 
 
-def _doc_count(company_id: str, docs_dir: Path) -> int:
+def _disk_doc_count(docs_dir: Path) -> int:
+    """Legacy fallback: count files on the ephemeral disk (non-Mongo storage)."""
+    if not docs_dir.exists():
+        return 0
+    return len([p for p in docs_dir.rglob("*") if p.is_file()])
+
+
+def _doc_counts(company_ids: list[str]) -> dict[str, int]:
+    """Return doc counts for many companies with one batched MongoDB query,
+    cached in-process for a short TTL."""
     now = time.monotonic()
-    cached = _doc_count_cache.get(company_id)
-    if cached is not None and now - cached[0] < _DOC_COUNT_TTL_SECONDS:
-        return cached[1]
-    count = count_documents(company_id)
-    if count == 0 and docs_dir.exists():
-        # fallback for legacy disk-only storage
-        count = len([p for p in docs_dir.rglob("*") if p.is_file()])
-    _doc_count_cache[company_id] = (now, count)
-    return count
+    result: dict[str, int] = {}
+    missing: list[str] = []
+    for cid in company_ids:
+        cached = _doc_count_cache.get(cid)
+        if cached is not None and now - cached[0] < _DOC_COUNT_TTL_SECONDS:
+            result[cid] = cached[1]
+        else:
+            missing.append(cid)
+
+    if missing:
+        batch = count_documents_batch(missing)
+        for cid in missing:
+            count = batch.get(cid, 0)
+            if count == 0:
+                # fallback for legacy disk-only storage
+                disk = _disk_doc_count(company_raw_docs_dir(cid))
+                count = disk if disk else 0
+            _doc_count_cache[cid] = (now, count)
+            result[cid] = count
+    return result
 
 
 def invalidate_doc_count(company_id: str) -> None:
-    """Drop the cached doc count so the next /companies call re-scans the folder."""
+    """Drop the cached doc count so the next /companies call re-scans."""
     _doc_count_cache.pop(company_id, None)
 
 
 @router.get("/companies")
 def companies() -> list[dict]:
-    result = []
-    for company in list_companies():
-        result.append(
-            {
-                "id": company.id,
-                "display_name": company.display_name,
-                "description": company.description,
-                "doc_count": _doc_count(company.id, company_raw_docs_dir(company.id)),
-            }
-        )
-    return result
+    companies_list = list_companies()
+    counts = _doc_counts([c.id for c in companies_list])
+    return [
+        {
+            "id": c.id,
+            "display_name": c.display_name,
+            "description": c.description,
+            "doc_count": counts.get(c.id, 0),
+        }
+        for c in companies_list
+    ]
 
 
 @router.get("/companies/mine")
 def my_companies(payload: dict = Depends(require_auth)) -> list[dict]:
     """Return companies owned by the current user."""
     user_id = payload.get("sub", "")
-    result = []
-    for company in list_companies_for_owner(user_id):
-        result.append(
-            {
-                "id": company.id,
-                "display_name": company.display_name,
-                "description": company.description,
-                "doc_count": _doc_count(company.id, company_raw_docs_dir(company.id)),
-            }
-        )
-    return result
+    owned = list_companies_for_owner(user_id)
+    counts = _doc_counts([c.id for c in owned])
+    return [
+        {
+            "id": c.id,
+            "display_name": c.display_name,
+            "description": c.description,
+            "doc_count": counts.get(c.id, 0),
+        }
+        for c in owned
+    ]
 
 
 @router.post("/companies", status_code=201)

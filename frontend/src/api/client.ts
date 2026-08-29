@@ -113,16 +113,63 @@ export async function sendMessage(
   return data
 }
 
-// ─── Companies (authenticated) ──────────────────────────────────────
+// ─── Caching ────────────────────────────────────────────────────────
+// Module-level in-memory cache so navigating pages doesn't re-fetch the
+// same data on every mount. `force` bypasses the cache for fresh reads.
 
-export async function fetchCompanies(_apiUrl?: string): Promise<CompanyInfo[]> {
-  const { data } = await api.get<CompanyInfo[]>('/companies')
-  return data
+const CACHE_TTL_MS = 30_000
+
+function createCached<T>(fetcher: () => Promise<T>) {
+  let value: T | null = null
+  let expires = 0
+  let inFlight: Promise<T> | null = null
+
+  async function get(force = false): Promise<T> {
+    const now = Date.now()
+    if (!force && value !== null && now < expires) return value
+    if (inFlight) return inFlight
+    inFlight = fetcher()
+      .then((data) => {
+        value = data
+        expires = now + CACHE_TTL_MS
+        return data
+      })
+      .finally(() => {
+        inFlight = null
+      })
+    return inFlight
+  }
+
+  function invalidate() {
+    value = null
+    expires = 0
+  }
+
+  return { get, invalidate }
 }
 
-export async function fetchMyCompanies(): Promise<CompanyInfo[]> {
+// ─── Companies (authenticated) ──────────────────────────────────────
+
+const companiesCache = createCached<CompanyInfo[]>(async () => {
+  const { data } = await api.get<CompanyInfo[]>('/companies')
+  return data
+})
+const myCompaniesCache = createCached<CompanyInfo[]>(async () => {
   const { data } = await api.get<CompanyInfo[]>('/companies/mine')
   return data
+})
+
+export async function fetchCompanies(_apiUrl?: string, force = false): Promise<CompanyInfo[]> {
+  return companiesCache.get(force)
+}
+
+export async function fetchMyCompanies(force = false): Promise<CompanyInfo[]> {
+  return myCompaniesCache.get(force)
+}
+
+export function invalidateCompaniesCache() {
+  companiesCache.invalidate()
+  myCompaniesCache.invalidate()
 }
 
 export async function createCompany(

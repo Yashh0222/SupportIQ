@@ -65,6 +65,23 @@ def count_documents(company_id: str) -> int:
     return docs.count_documents({"company_id": company_id})
 
 
+def count_documents_batch(company_ids: list[str]) -> dict[str, int]:
+    """Return {company_id: doc_count} for all *company_ids* in one query."""
+    if not company_ids:
+        return {}
+    _, docs = _gridfs()
+    if docs is None:
+        return {}
+    pipeline = [
+        {"$match": {"company_id": {"$in": company_ids}}},
+        {"$group": {"_id": "$company_id", "n": {"$sum": 1}}},
+    ]
+    result: dict[str, int] = {cid: 0 for cid in company_ids}
+    for row in docs.aggregate(pipeline):
+        result[row["_id"]] = row["n"]
+    return result
+
+
 def read_document(company_id: str, filename: str) -> bytes | None:
     """Read a document's bytes back from GridFS by filename."""
     fs, docs = _gridfs()
