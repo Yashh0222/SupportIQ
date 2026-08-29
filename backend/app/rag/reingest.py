@@ -29,6 +29,12 @@ def _cache_dir(company_id: str) -> Path:
 async def reingest_company(company_id: str) -> int:
     """Rebuild one company's collection from its GridFS documents."""
     files = list(iter_company_documents(company_id))
+
+    try:
+        delete_company_collection(company_id)
+    except Exception as exc:  # collection may not exist yet
+        logger.warning("Could not clear collection for %s: %s", company_id, exc)
+
     if not files:
         return 0
 
@@ -37,11 +43,6 @@ async def reingest_company(company_id: str) -> int:
     cache.mkdir(parents=True, exist_ok=True)
     for filename, data in files:
         (cache / filename).write_bytes(data)
-
-    try:
-        delete_company_collection(company_id)
-    except Exception as exc:  # collection may not exist yet
-        logger.warning("Could not clear collection for %s: %s", company_id, exc)
 
     documents = load_documents(str(cache))
     chunks = chunk_documents(documents)
