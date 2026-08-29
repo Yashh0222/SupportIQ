@@ -1,14 +1,12 @@
---extra-index-url https://download.pytorch.org/whl/cpu
 fastapi
 uvicorn[standard]
 langchain
 langchain-community
-langchain-huggingface
+langchain-jina
 langchain-chroma
 langchain-text-splitters
 langgraph
 langchain-groq
-sentence-transformers
 chromadb
 python-multipart
 python-dotenv

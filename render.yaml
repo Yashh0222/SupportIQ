@@ -8,6 +8,8 @@ services:
     envVars:
       - key: GROQ_API_KEY
         sync: false
+      - key: JINA_API_KEY
+        sync: false
       - key: LANGCHAIN_API_KEY
         sync: false
       - key: LANGCHAIN_TRACING_V2
