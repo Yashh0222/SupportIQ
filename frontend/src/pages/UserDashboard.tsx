@@ -18,7 +18,14 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
 function generateEmbedHtml(companyId: string): string {
   const backendUrl = API_URL
-  return `<script src="${backendUrl}/widget.js" data-company="${companyId}" data-api-url="${backendUrl}" async></script>`
+  return [
+    `<!-- SupportIQ chat widget -->`,
+    `<script src="${backendUrl}/widget.js"`,
+    `        data-company="${companyId}"`,
+    `        data-api-url="${backendUrl}"`,
+    `        async>`,
+    `</script>`,
+  ].join('\n')
 }
 
 function CopyButton({ text }: { text: string }) {
@@ -32,13 +39,27 @@ function CopyButton({ text }: { text: string }) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className="rounded bg-indigo-100 px-2 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-200"
-    >
-      {copied ? 'Copied!' : 'Copy'}
-    </button>
+    <div className="space-y-2">
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="w-full rounded bg-indigo-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-gray-900"
+      >
+        {copied ? 'Copied to clipboard!' : 'Copy code'}
+      </button>
+      <p
+        className="text-center text-[10px] font-medium"
+        aria-live="polite"
+      >
+        {copied ? (
+          <span className="text-green-400">Code copied successfully.</span>
+        ) : (
+          <span className="text-gray-500">
+            Paste this into your website's HTML where you want the chat widget to appear.
+          </span>
+        )}
+      </p>
+    </div>
   )
 }
 
@@ -306,17 +327,19 @@ export default function UserDashboard() {
 
                   {/* Widget code display */}
                   {showWidgetFor === c.id && (
-                    <div className="mt-3 rounded-lg bg-gray-900 p-3">
-                      <p className="mb-1 text-[10px] font-semibold text-gray-400">Embed HTML:</p>
-                      <pre className="overflow-x-auto text-[10px] text-green-400">
+                    <div className="mt-3 overflow-hidden rounded-lg border border-gray-800 bg-gray-900">
+                      <div className="flex items-center justify-between border-b border-gray-800 px-3 py-2">
+                        <p className="text-[11px] font-semibold text-gray-400">Widget embed code</p>
+                        <span className="rounded bg-gray-800 px-1.5 py-0.5 text-[10px] font-medium text-gray-500">
+                          HTML
+                        </span>
+                      </div>
+                      <pre className="max-h-64 overflow-auto whitespace-pre p-3 text-xs leading-relaxed text-green-500">
                         {generateEmbedHtml(c.id)}
                       </pre>
-                      <div className="mt-2 flex gap-2">
+                      <div className="border-t border-gray-800 p-2">
                         <CopyButton text={generateEmbedHtml(c.id)} />
                       </div>
-                      <p className="mt-2 text-[10px] text-gray-500">
-                        Paste this into your website's HTML where you want the chat widget to appear.
-                      </p>
                     </div>
                   )}
 
