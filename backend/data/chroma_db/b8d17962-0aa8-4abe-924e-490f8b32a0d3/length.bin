@@ -1,5 +1,0 @@
-## Webhooks
-AcmeCRM can send webhooks for events like `deal.created`, `deal.updated`, and `contact.created`. Configure the endpoint URL under Settings -> Webhooks. We retry failed deliveries up to 5 times with exponential backoff.
-
-## Integration with HubSpot
-The HubSpot integration syncs contacts and deals in both directions every 15 minutes. Enable it under Settings -> Integrations -> HubSpot.ÿÿ

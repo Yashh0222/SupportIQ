@@ -8,7 +8,12 @@ venv/
 # Env / secrets
 .env
 
-# Data
+# Data (vector store + caches, rebuilt at runtime)
+backend/data/chroma_db/
+backend/data/companies/*/reingest_cache/
+
+# Logs
+*.log
 
 # Frontend
 frontend/node_modules/
