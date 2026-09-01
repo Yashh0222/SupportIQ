@@ -187,10 +187,17 @@ def company_raw_docs_dir(company_id: str) -> Path:
     return COMPANIES_DIR / get_company(company_id).id / "raw_docs"
 
 
-def delete_company(company_id: str) -> bool:
-    """Remove a company from the registry. Built-in companies cannot be deleted."""
+def delete_company(company_id: str, allow_builtin: bool = False) -> bool:
+    """Remove a company from the registry.
+
+    Built-in companies are protected unless ``allow_builtin`` is True
+    (used by admins who may delete any company).
+    """
     if company_id in KNOWN_COMPANIES:
-        return False
+        if not allow_builtin:
+            return False
+        KNOWN_COMPANIES.pop(company_id, None)
+        return True
     registry = _load_registry()
     if company_id not in registry:
         return False

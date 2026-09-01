@@ -124,11 +124,14 @@ def delete_company_route(
     """Delete a company. Owner or admin can delete."""
     user_id = payload.get("sub", "")
     role = (payload.get("metadata") or {}).get("role")
+    is_admin = role == "admin"
 
-    if role != "admin" and not is_company_owner(company_id, user_id):
+    if not is_admin and not is_company_owner(company_id, user_id):
         raise HTTPException(status_code=403, detail="Only the company owner or admin can delete this company.")
 
-    if not delete_company(company_id):
+    if not delete_company(company_id, allow_builtin=is_admin):
+        # Non-admins can never delete built-in companies, so only return 404
+        # when the company genuinely does not exist.
         raise HTTPException(status_code=404, detail="Company not found or is a built-in company.")
 
     # Clean up files, vector store, and persistent documents

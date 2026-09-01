@@ -112,3 +112,21 @@ def delete_company_documents(company_id: str) -> int:
             fs.delete(fid)
     result = docs.delete_many({"company_id": company_id})
     return result.deleted_count if result else 0
+
+
+def delete_document(company_id: str, filename: str) -> bool:
+    """Remove a single document (GridFS file + metadata) for a company.
+
+    Returns True if a metadata record was found and removed.
+    """
+    fs, docs = _gridfs()
+    if fs is None:
+        return False
+    meta = docs.find_one({"company_id": company_id, "filename": filename})
+    if meta is None:
+        return False
+    file_id = meta.get("file_id")
+    if file_id is not None:
+        fs.delete(file_id)
+    docs.delete_one({"company_id": company_id, "filename": filename})
+    return True

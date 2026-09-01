@@ -56,6 +56,11 @@ export interface UploadResponse {
   results: UploadResult[]
 }
 
+export interface DocumentInfo {
+  filename: string
+  length: number
+}
+
 export interface OriginRequest {
   id: string
   user_id: string
@@ -196,6 +201,21 @@ export async function uploadDocuments(
   if (company) formData.append('company', company)
   const { data } = await api.post<UploadResponse>('/upload', formData)
   return data
+}
+
+// ─── Documents (authenticated, owner or admin) ──────────────────────
+
+export async function fetchDocuments(companyId: string): Promise<DocumentInfo[]> {
+  const { data } = await api.get<DocumentInfo[]>('/documents', {
+    params: { company: companyId },
+  })
+  return data
+}
+
+export async function deleteDocument(companyId: string, filename: string): Promise<void> {
+  await api.delete(`/documents/${encodeURIComponent(filename)}`, {
+    params: { company: companyId },
+  })
 }
 
 // ─── Origin requests (authenticated user) ──────────────────────────

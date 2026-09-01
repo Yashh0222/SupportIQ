@@ -9,9 +9,11 @@ import {
   submitOriginRequest,
   fetchMyOriginRequests,
   uploadDocuments,
+  fetchDocuments,
+  deleteDocument,
   invalidateCompaniesCache,
 } from '../api/client'
-import type { CompanyInfo, OriginRequest, UploadResult } from '../api/client'
+import type { CompanyInfo, OriginRequest, UploadResult, DocumentInfo } from '../api/client'
 
 const ACCEPTED = '.md,.txt,.rst,.html,.pdf'
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
@@ -80,6 +82,11 @@ export default function UserDashboard() {
   const [uploadResults, setUploadResults] = useState<UploadResult[] | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
 
+  // Documents
+  const [documents, setDocuments] = useState<DocumentInfo[]>([])
+  const [documentsLoading, setDocumentsLoading] = useState(false)
+  const [docError, setDocError] = useState<string | null>(null)
+
   // Widget code
   const [showWidgetFor, setShowWidgetFor] = useState<string | null>(null)
 
@@ -112,6 +119,35 @@ export default function UserDashboard() {
     }
   }, [])
 
+  const loadDocuments = useCallback(async (companyId: string) => {
+    if (!companyId) {
+      setDocuments([])
+      return
+    }
+    setDocumentsLoading(true)
+    setDocError(null)
+    try {
+      setDocuments(await fetchDocuments(companyId))
+    } catch {
+      setDocuments([])
+    } finally {
+      setDocumentsLoading(false)
+    }
+  }, [])
+
+  const onDeleteDocument = async (companyId: string, filename: string) => {
+    if (!confirm(`Delete document "${filename}"? Its chunks will also be removed from the knowledge base.`)) return
+    try {
+      await deleteDocument(companyId, filename)
+      invalidateCompaniesCache()
+      await loadDocuments(companyId)
+      void loadCompanies()
+    } catch (err) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      setDocError(detail ?? 'Could not delete the document.')
+    }
+  }
+
   const onDeleteCompany = async (companyId: string) => {
     if (!confirm(`Delete company "${companyId}"? This cannot be undone.`)) return
     try {
@@ -130,6 +166,10 @@ export default function UserDashboard() {
     void loadCompanies()
     void loadOriginRequests()
   }, [loadCompanies, loadOriginRequests])
+
+  useEffect(() => {
+    void loadDocuments(selectedCompany)
+  }, [selectedCompany, loadDocuments])
 
   const onCreate = async (e: FormEvent) => {
     e.preventDefault()
@@ -164,6 +204,7 @@ export default function UserDashboard() {
       setUploadState('success')
       setFiles([])
       void loadCompanies()
+      void loadDocuments(selectedCompany)
     } catch (err) {
       const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
       setUploadError(detail ?? 'Upload failed. Make sure the backend is running.')
@@ -434,6 +475,43 @@ export default function UserDashboard() {
                 {uploadError}
               </div>
             )}
+          </div>
+        )}
+
+        {/* ─── Company Documents ─────────────────────────────────── */}
+        {selectedCompany && (
+          <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-gray-900">Uploaded Documents</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Files in <span className="font-medium text-gray-700">{selectedCompany}</span>&apos;s knowledge base. Delete a file to remove it and its chunks.
+            </p>
+
+            {documentsLoading ? (
+              <p className="mt-4 text-sm text-gray-400">Loading documents…</p>
+            ) : documents.length === 0 ? (
+              <p className="mt-4 text-sm text-gray-400">No documents uploaded yet.</p>
+            ) : (
+              <ul className="mt-4 space-y-2">
+                {documents.map((d) => (
+                  <li
+                    key={d.filename}
+                    className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-gray-900">{d.filename}</p>
+                      <p className="text-xs text-gray-400">{(d.length / 1024).toFixed(1)} KB</p>
+                    </div>
+                    <button
+                      onClick={() => void onDeleteDocument(selectedCompany, d.filename)}
+                      className="ml-3 shrink-0 rounded bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                    >
+                      Delete
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {docError && <p className="mt-3 text-xs text-red-600">{docError}</p>}
           </div>
         )}
 

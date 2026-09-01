@@ -8,6 +8,7 @@ from app.auth import require_admin, require_auth
 from app.middleware import DynamicCorsMiddleware
 from app.routes.chat import router as chat_router
 from app.routes.companies import router as companies_router
+from app.routes.documents import router as documents_router
 from app.routes.origin_requests import router as origin_requests_router
 from app.routes.origins import router as origins_router
 from app.routes.upload import router as upload_router
@@ -25,6 +26,9 @@ app.include_router(origin_requests_router)
 
 # Upload: auth checked per-route (owner or admin)
 app.include_router(upload_router)
+
+# Document management: auth checked per-route (owner or admin)
+app.include_router(documents_router)
 
 # Admin-only routes
 app.include_router(origins_router, dependencies=[Depends(require_admin)])

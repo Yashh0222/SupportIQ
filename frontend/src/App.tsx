@@ -11,9 +11,12 @@ import {
   rejectOriginRequest,
   removeAllowedOrigin,
   deleteCompany,
+  uploadDocuments,
+  fetchDocuments,
+  deleteDocument,
   invalidateCompaniesCache,
 } from './api/client'
-import type { CompanyInfo, OriginRequest } from './api/client'
+import type { CompanyInfo, OriginRequest, DocumentInfo } from './api/client'
 
 export default function App({ onBack }: { onBack?: () => void }) {
   const { isLoaded, userId, sessionClaims } = useAuth()
@@ -28,6 +31,17 @@ export default function App({ onBack }: { onBack?: () => void }) {
   const [actionBusy, setActionBusy] = useState<string | null>(null)
 
   const [allCompanies, setAllCompanies] = useState<CompanyInfo[]>([])
+
+  const [uploadFor, setUploadFor] = useState<string | null>(null)
+  const [uploadFiles, setUploadFiles] = useState<File[]>([])
+  const [uploading, setUploading] = useState<string | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null)
+
+  const [docsFor, setDocsFor] = useState<string | null>(null)
+  const [docs, setDocs] = useState<DocumentInfo[]>([])
+  const [docsLoading, setDocsLoading] = useState(false)
+  const [docError, setDocError] = useState<string | null>(null)
 
   const loadOrigins = useCallback(async () => {
     try { setOrigins(await fetchAllowedOrigins()) } catch { setOrigins([]) }
@@ -105,6 +119,54 @@ export default function App({ onBack }: { onBack?: () => void }) {
     } catch (err) {
       const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
       alert(detail ?? 'Could not delete the company.')
+    }
+  }
+
+  const onUpload = async (e: FormEvent, companyId: string) => {
+    e.preventDefault()
+    if (uploading || !uploadFor) return
+    if (uploadFiles.length === 0) return
+    setUploading(companyId)
+    setUploadError(null)
+    setUploadMessage(null)
+    try {
+      const res = await uploadDocuments(uploadFiles, undefined, companyId)
+      invalidateCompaniesCache()
+      void loadCompanies()
+      setUploadMessage(`Uploaded ${res.files} file(s), ${res.chunks_added} chunks added.`)
+      setUploadFiles([])
+      setUploadFor(null)
+    } catch (err) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      setUploadError(detail ?? 'Upload failed. Make sure the backend is running.')
+    } finally {
+      setUploading(null)
+    }
+  }
+
+  const loadDocs = async (companyId: string) => {
+    setDocsLoading(true)
+    setDocError(null)
+    try {
+      const list = await fetchDocuments(companyId)
+      setDocs(list)
+    } catch {
+      setDocs([])
+    } finally {
+      setDocsLoading(false)
+    }
+  }
+
+  const onDeleteDoc = async (companyId: string, filename: string) => {
+    if (!confirm(`Delete document "${filename}"? Its chunks will also be removed.`)) return
+    try {
+      await deleteDocument(companyId, filename)
+      invalidateCompaniesCache()
+      void loadCompanies()
+      await loadDocs(companyId)
+    } catch (err) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      setDocError(detail ?? 'Could not delete the document.')
     }
   }
 
@@ -217,20 +279,92 @@ export default function App({ onBack }: { onBack?: () => void }) {
         ) : (
           <div className="mt-4 space-y-2">
             {allCompanies.map((c) => (
-              <div key={c.id} className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">{c.display_name} <span className="font-normal text-gray-400">({c.id})</span></p>
-                  {c.description && <p className="text-xs text-gray-500">{c.description}</p>}
-                  <p className="text-xs text-gray-400">{c.doc_count} documents</p>
+              <div key={c.id} className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{c.display_name} <span className="font-normal text-gray-400">({c.id})</span></p>
+                    {c.description && <p className="text-xs text-gray-500">{c.description}</p>}
+                    <p className="text-xs text-gray-400">{c.doc_count} documents</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setUploadFor(uploadFor === c.id ? null : c.id)
+                        setUploadError(null)
+                        setUploadMessage(null)
+                        setUploadFiles([])
+                      }}
+                      className="shrink-0 rounded bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-100"
+                    >
+                      {uploadFor === c.id ? 'Cancel' : 'Upload'}
+                    </button>
+                    <button
+                      onClick={() => void (async () => {
+                        setDocsFor(docsFor === c.id ? null : c.id)
+                        setDocError(null)
+                        if (docsFor !== c.id) await loadDocs(c.id)
+                      })()}
+                      className="shrink-0 rounded bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-200"
+                    >
+                      {docsFor === c.id ? 'Hide Docs' : 'Docs'}
+                    </button>
+                    <button
+                      onClick={() => void onDeleteCompany(c.id)}
+                      className="shrink-0 rounded bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => void onDeleteCompany(c.id)}
-                  className="shrink-0 rounded bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
-                >
-                  Delete
-                </button>
+
+                {uploadFor === c.id && (
+                  <form onSubmit={(e) => void onUpload(e, c.id)} className="mt-3 space-y-2 border-t border-gray-200 pt-3">
+                    <input
+                      type="file"
+                      multiple
+                      accept=".md,.txt,.rst,.html,.pdf"
+                      onChange={(e) => setUploadFiles(Array.from(e.target.files ?? []))}
+                      className="block w-full text-xs text-gray-700 file:mr-2 file:rounded file:border-0 file:bg-indigo-50 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-indigo-700"
+                    />
+                    <button
+                      type="submit"
+                      disabled={uploading === c.id || uploadFiles.length === 0}
+                      className="rounded bg-indigo-600 px-3 py-1 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                      {uploading === c.id ? 'Uploading...' : `Upload to ${c.display_name}`}
+                    </button>
+                  </form>
+                )}
+
+                {docsFor === c.id && (
+                  <div className="mt-3 border-t border-gray-200 pt-3">
+                    {docsLoading ? (
+                      <p className="text-xs text-gray-400">Loading documents…</p>
+                    ) : docs.length === 0 ? (
+                      <p className="text-xs text-gray-400">No documents uploaded.</p>
+                    ) : (
+                      <ul className="space-y-1">
+                        {docs.map((d) => (
+                          <li key={d.filename} className="flex items-center justify-between rounded bg-white px-2 py-1 text-xs text-gray-700">
+                            <span className="truncate font-mono">{d.filename}</span>
+                            <button
+                              type="button"
+                              onClick={() => void onDeleteDoc(c.id, d.filename)}
+                              className="ml-2 shrink-0 font-semibold text-red-500 hover:text-red-700"
+                            >
+                              Delete
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {docError && <p className="mt-2 text-xs text-red-600">{docError}</p>}
+                  </div>
+                )}
               </div>
             ))}
+            {uploadError && <p className="mt-2 text-xs text-red-600">{uploadError}</p>}
+            {uploadMessage && <p className="mt-2 text-xs text-green-600">{uploadMessage}</p>}
           </div>
         )}
       </div>
