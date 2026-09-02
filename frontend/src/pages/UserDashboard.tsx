@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 import ChatWidget from '../widget/ChatWidget'
 import {
   fetchMyCompanies,
@@ -243,19 +242,6 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-100">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-          <Link to="/" className="text-lg font-bold text-gray-900">
-            Support<span className="text-indigo-600">IQ</span>
-          </Link>
-          <div className="flex items-center gap-4 text-sm">
-            <Link to="/" className="text-gray-500 hover:text-gray-700">Home</Link>
-            <span className="font-medium text-indigo-600">My Dashboard</span>
-          </div>
-        </div>
-      </nav>
-
       <div className="mx-auto max-w-5xl px-6 pt-20 pb-14">
         <h1 className="text-3xl font-bold text-gray-900">My Dashboard</h1>
         <p className="mt-2 text-sm text-gray-500">
@@ -542,12 +528,6 @@ export default function UserDashboard() {
           </div>
         )}
 
-        {/* ─── Chat Demo ──────────────────────────────────────────── */}
-        <div className="mt-6 text-center">
-          <Link to="/" className="text-sm text-indigo-500 hover:text-indigo-700">
-            Back to Home
-          </Link>
-        </div>
       </div>
 
       {selectedCompany && (

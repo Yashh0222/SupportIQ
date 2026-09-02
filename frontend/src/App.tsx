@@ -197,7 +197,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-gradient-to-br from-indigo-50 to-white px-6 py-12 text-center">
+    <div className="flex min-h-screen flex-col items-center bg-gradient-to-br from-indigo-50 to-white px-6 pt-20 pb-12 text-center">
       {onBack && (
         <button onClick={onBack} className="mb-4 rounded-full border border-indigo-200 bg-white px-4 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50">
           Back to demo
