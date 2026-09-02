@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { SignedIn, SignedOut, UserButton, useAuth } from '@clerk/clerk-react'
 import { Link } from 'react-router-dom'
-import App from '../App'
+
 import ChatWidget from '../widget/ChatWidget'
 import { fetchCompanies, useApiSetup } from '../api/client'
 import type { CompanyInfo } from '../api/client'
@@ -96,7 +96,7 @@ export default function LandingPage() {
   useApiSetup()
   const [companies, setCompanies] = useState<CompanyInfo[]>(DEFAULT_COMPANIES)
   const [companyId, setCompanyId] = useState('acmecrm')
-  const [showAdmin, setShowAdmin] = useState(false)
+ 
 
   const refreshCompanies = useCallback(() => {
     fetchCompanies()
@@ -110,20 +110,11 @@ export default function LandingPage() {
     refreshCompanies()
   }, [refreshCompanies])
 
-  useEffect(() => {
-    if (!showAdmin) refreshCompanies()
-  }, [showAdmin, refreshCompanies])
+
 
   const active = companies.find((c) => c.id === companyId) ?? companies[0]
 
-  if (showAdmin) {
-    return (
-      <>
-        <App onBack={() => setShowAdmin(false)} />
-        <ChatWidget apiUrl={API_URL} org={active?.display_name} company={active?.id} />
-      </>
-    )
-  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-100 text-gray-900">
@@ -191,12 +182,12 @@ export default function LandingPage() {
           Chat widget: <span className="font-mono">widget.js</span> embeddable bundle · LangChain +
           LangGraph + FastAPI · ChromaDB · MCP
         </p>
-        <button
+        {/* <button
           onClick={() => setShowAdmin(true)}
           className="mt-3 text-xs font-medium text-indigo-500 hover:text-indigo-700"
         >
           Admin: upload documents →
-        </button>
+        </button> */}
       </div>
 
       <ChatWidget
