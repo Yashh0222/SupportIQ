@@ -39,11 +39,31 @@ def _collection():
     return db["origins"] if db is not None else None
 
 
+def _default_origins() -> list[str]:
+    return [
+        _validate(normalize_origin(o))
+        for o in os.getenv("ALLOWED_ORIGINS", _DEFAULT_ORIGINS_ENV).split(",")
+        if o.strip()
+    ]
+
+
 def _load() -> list[str]:
     """Load the allowed-origin list from MongoDB (or legacy JSON file)."""
     coll = _collection()
     if coll is not None:
-        return [doc["origin"] for doc in coll.find({})]
+        origins = [doc["origin"] for doc in coll.find({})]
+        if origins:
+            return origins
+        # Fresh deploy (or emptied list): seed the collection with the
+        # defaults so the API doesn't deny every origin until an admin
+        # manually re-adds them.
+        seed = _default_origins()
+        if seed:
+            try:
+                coll.insert_many([{"origin": o} for o in seed])
+            except Exception:
+                pass  # concurrent seeding or write failure: still return defaults
+        return seed
     return _load_json()
 
 
@@ -53,11 +73,7 @@ def _load_json() -> list[str]:
             return json.loads(ORIGINS_FILE.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError):
             pass
-    seed = [
-        _validate(normalize_origin(o))
-        for o in os.getenv("ALLOWED_ORIGINS", _DEFAULT_ORIGINS_ENV).split(",")
-        if o.strip()
-    ]
+    seed = _default_origins()
     ORIGINS_FILE.parent.mkdir(parents=True, exist_ok=True)
     ORIGINS_FILE.write_text(json.dumps(sorted(seed), indent=2), encoding="utf-8")
     return seed
