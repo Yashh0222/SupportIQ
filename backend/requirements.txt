@@ -11,5 +11,6 @@ python-multipart
 python-dotenv
 pypdf
 pymongo
+requests
 mcp>=1.0,<2.0
 clerk-backend-api

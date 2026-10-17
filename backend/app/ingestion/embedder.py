@@ -12,6 +12,10 @@ JINA_API_KEY = os.getenv("JINA_API_KEY")
 JINA_URL = "https://api.jina.ai/v1/embeddings"
 
 
+class EmbeddingError(RuntimeError):
+    """Raised when the upstream embedding API is unavailable or rejects a request."""
+
+
 class JinaEmbeddings(Embeddings):
     """API-based Jina embedder using the native REST endpoint.
 
@@ -25,24 +29,31 @@ class JinaEmbeddings(Embeddings):
         task: str = "text-matching",
     ) -> None:
         if not api_key:
-            raise ValueError("JINA_API_KEY is not set")
+            raise EmbeddingError("JINA_API_KEY is not set")
         self.model = model
         self.api_key = api_key
         self.task = task
 
     def _embed(self, texts: list[str]) -> list[list[float]]:
-        response = requests.post(
-            JINA_URL,
-            headers={"Authorization": f"Bearer {self.api_key}"},
-            json={
-                "model": self.model,
-                "task": self.task,
-                "input": texts,
-                "embedding_type": "float",
-            },
-            timeout=60,
-        )
-        response.raise_for_status()
+        try:
+            response = requests.post(
+                JINA_URL,
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                json={
+                    "model": self.model,
+                    "task": self.task,
+                    "input": texts,
+                    "embedding_type": "float",
+                },
+                timeout=60,
+            )
+        except requests.RequestException as exc:
+            raise EmbeddingError(f"Could not reach Jina embeddings API: {exc}") from exc
+        if not response.ok:
+            body = (response.text or "")[:300]
+            raise EmbeddingError(
+                f"Jina embeddings API error {response.status_code}: {body}"
+            )
         data = response.json()
         return [item["embedding"] for item in data.get("data", [])]
 

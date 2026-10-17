@@ -6,7 +6,7 @@ from app.auth import require_auth
 from app.companies import DEFAULT_COMPANY_ID, company_raw_docs_dir, is_company_owner
 from app.documents import save_document
 from app.ingestion.chunker import chunk_documents
-from app.ingestion.embedder import get_embedding_model
+from app.ingestion.embedder import EmbeddingError, get_embedding_model
 from app.ingestion.loader import load_documents
 from app.rag.vectorstore import load_vectorstore
 from app.routes.companies import invalidate_doc_count
@@ -37,7 +37,10 @@ async def upload(
     company_dir = company_raw_docs_dir(company_id)
     company_dir.mkdir(parents=True, exist_ok=True)
 
-    vectorstore = load_vectorstore(get_embedding_model(), company_id)
+    try:
+        vectorstore = load_vectorstore(get_embedding_model(), company_id)
+    except EmbeddingError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     results: list[dict] = []
     for file in files:
@@ -54,7 +57,10 @@ async def upload(
         docs = load_documents(str(dest))
         chunks = chunk_documents(docs)
         if chunks:
-            await vectorstore.aadd_documents(chunks)
+            try:
+                await vectorstore.aadd_documents(chunks)
+            except EmbeddingError as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
 
         results.append(
             {
